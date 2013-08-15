@@ -194,13 +194,19 @@ _setup:
     subl $_main, %ecx
     rep movsb
 
-    /*
+    # copy data
+    movl $_data, %esi
+    movl $DATA_BASE, %edi
+    movl $_data_end, %ecx
+    subl $_data, %ecx
+    rep movsb
+
     # initialize interrupt environment
     xorl %eax, %eax
     movw $INT_STACK_SELECTOR, %ax
     movw %ax, %ss
     movl $INT_STACK_INIT_ESP, %esp
-    pushl %eax
+    pushl $0x00
 
     # initialize protected-mode environment
     xorl %eax, %eax
@@ -213,8 +219,7 @@ _setup:
     movl $STACK_INIT_ESP, %esp
     movw $NULL_SELECTOR, %ax
     movw %ax, %gs
-    movw %ax, %ss
-    */
+    movw %ax, %fs
 
     ljmp $CODE_MAIN_SELECTOR, $0x00
 

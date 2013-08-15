@@ -12,10 +12,11 @@ rm -f boot boot.o boot.bin
 as -o setup.o setup.s
 as -o int.o int.s
 as -o main.o main.s
-ld -Ttext 0x6000 -o setup setup.o int.o main.o
+as -o data.o data.s
+ld -Ttext 0x6000 -o setup setup.o int.o main.o data.o
 objcopy -O binary setup setup.bin
 dd if=setup.bin of=boot.img count=4 seek=1
-rm -f setup.o main.o setup setup.bin
+rm -f setup.o main.o int.o data.o setup setup.bin
 
 # build interrupt and exception handler
 #as -o int.o int.s

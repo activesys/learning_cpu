@@ -41,7 +41,7 @@
 # attr = 0x409a(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=1010)
 .equ INT_HANDLER_BASE,     0x1000
 .equ INT_HANDLER_LIMIT,    0xffff
-.equ INT_HANDLER_ATTR,     0x409a
+.equ INT_HANDLER_ATTR,     0x409b
 .equ INT_HANDLER_SELECTOR, 0x08
 
 # main code segment
@@ -102,18 +102,20 @@
 .equ INT_0X80_OFFSET,      0x00
 .equ INT_0X90_OFFSET,      0x20
 .equ INT_0XFF_OFFSET,      0x40
-.equ EXCEPTION_GP_OFFSET,  0x60
+.equ EXCEPTION_GP_OFFSET,  0x100
 
 .equ GDT_BASE,             0x0800
 .equ IDT_BASE,             0x00
 
 # for access data
-.equ MAIN_MES_OFFSET,      0x00
-.equ FUN_MSG_OFFSET,       0x80 
-.equ END_MSG_OFFSET,       0x100
-.equ MAIN_MSG_LEN_OFFSET,  0x180
-.equ FUN_MSG_LEN_OFFSET,   0x182
-.equ END_MSG_LEN_OFFSET,   0x184
+.equ MAIN_MSG_OFFSET,           0x00
+.equ GP_MSG_OFFSET,             0x80 
+.equ INT_0X80_MSG_OFFSET,       0x100
+.equ INT_0X90_MSG_OFFSET,       0x180
+.equ MAIN_MSG_LEN_OFFSET,       0x200
+.equ GP_MSG_LEN_OFFSET,         0x202
+.equ INT_0X80_MSG_LEN_OFFSET,   0x204
+.equ INT_0X90_MSG_LEN_OFFSET,   0x206
 
 .macro read_sector add, sector, count
     movb $0x02, %ah
