@@ -22,3 +22,5 @@
 # core dump files
 core.*
 
+# vim swp files
+*.swp
