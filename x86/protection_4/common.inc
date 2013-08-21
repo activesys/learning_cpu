@@ -108,6 +108,7 @@
 
 # for IDT
 .equ EXCEPTION_GP_OFFSET,       0x00
+.equ INT_0XFF_OFFSET,           0x20
 
 .equ GDT_BASE,                  0x0800
 .equ GDT_LIMIT,                 0x50
@@ -115,14 +116,8 @@
 .equ IDT_LIMIT,                 0x07ff
 
 # for access data
-.equ MAIN_MSG_OFFSET,           0x00
-.equ GP_MSG_OFFSET,             0x80 
-.equ INT_0X80_MSG_OFFSET,       0x100
-.equ INT_0X90_MSG_OFFSET,       0x180
-.equ MAIN_MSG_LEN_OFFSET,       0x200
-.equ GP_MSG_LEN_OFFSET,         0x202
-.equ INT_0X80_MSG_LEN_OFFSET,   0x204
-.equ INT_0X90_MSG_LEN_OFFSET,   0x206
+.equ GP_MSG_OFFSET,             0x40 
+.equ GP_MSG_LEN_OFFSET,         0x80
 
 .macro read_sector add, sector, count
     movb $0x02, %ah

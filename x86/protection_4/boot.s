@@ -16,7 +16,7 @@ _start:
     read_sector $USER_CODE_BASE, $0x05, $0x01
     jc _read_sector_error
 
-    ljmp $SETUP_SEG, $0x00
+    ljmp $0x00, $SETUP_SEG
 
 _read_sector_error:
     # show message.

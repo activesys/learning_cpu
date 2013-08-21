@@ -19,6 +19,10 @@ _start:
     movl $EXCEPTION_GP_OFFSET, %ecx
     call _setup_idt
 
+    movl $0xff, %eax
+    movl $INT_0XFF_OFFSET, %ecx
+    call _setup_idt
+
     lidt IDT_POINTER
 
     # setup gdt
@@ -28,46 +32,55 @@ _start:
     movl $NULL_DESCRIPTOR_ATTR, %esi
     call _setup_gdt
 
+    addl $0x08, %edi
     movl $SETUP_BASE, %eax
     movl $SETUP_LIMIT, %ecx
     movl $SETUP_ATTR, %esi
     call _setup_gdt
 
+    addl $0x08, %edi
     movl $INT_HANDLER_BASE, %eax
     movl $INT_HANDLER_LIMIT, %ecx
     movl $INT_HANDLER_ATTR, %esi
     call _setup_gdt
 
+    addl $0x08, %edi
     movl $VIDEO_BASE, %eax
     movl $VIDEO_LIMIT, %ecx
     movl $VIDEO_ATTR, %esi
     call _setup_gdt
 
+    addl $0x08, %edi
     movl $KERNEL_CODE_BASE, %eax
     movl $KERNEL_CODE_LIMIT, %ecx
     movl $KERNEL_CODE_ATTR, %esi
     call _setup_gdt
 
+    addl $0x08, %edi
     movl $KERNEL_DATA_BASE, %eax
     movl $KERNEL_DATA_LIMIT, %ecx
     movl $KERNEL_DATA_ATTR, %esi
     call _setup_gdt
 
+    addl $0x08, %edi
     movl $KERNEL_STACK_BASE, %eax
     movl $KERNEL_STACK_LIMIT, %ecx
     movl $KERNEL_STACK_ATTR, %esi
     call _setup_gdt
 
+    addl $0x08, %edi
     movl $USER_CODE_BASE, %eax
     movl $USER_CODE_LIMIT, %ecx
     movl $USER_CODE_ATTR, %esi
     call _setup_gdt
 
+    addl $0x08, %edi
     movl $USER_DATA_BASE, %eax
     movl $USER_DATA_LIMIT, %ecx
     movl $USER_DATA_ATTR, %esi
     call _setup_gdt
 
+    addl $0x08, %edi
     movl $USER_STACK_BASE, %eax
     movl $USER_STACK_LIMIT, %ecx
     movl $USER_STACK_ATTR, %esi
@@ -81,15 +94,7 @@ _start:
     movl %eax, %cr0
 
     # far jmp
-    ljmp $SETUP_SELECTOR, _setup
-
-_read_sector_error:
-    # show message.
-    movw $boot_message, %si
-    movw $boot_message_length, %cx
-    call _echo
-
-    jmp .
+    ljmp $SETUP_SELECTOR, $_setup
 
 #
 # %edi is address
@@ -162,15 +167,23 @@ IDT_POINTER:
 
 ###############################################################
 # Protected-mode code for interrupt handler
-.code 32
+.code32
 _interrupt_and_exception:
 .type _gp, @function
 _gp:
-    movl $_gp_msg, %esi
-    movl $_gp_msg_length, %ecx
+    movl $GP_MSG_OFFSET, %esi
+    movl $GP_MSG_LEN_OFFSET, %eax
+    movl %ds:(%eax), %ecx
     call _int_echo
 
     jmp .
+    iret
+
+.space 0x20-(.-_interrupt_and_exception), 0x00
+.type _int_0xff, @function
+_int_0xff:
+    call _int_echo
+
     iret
 
 # %edi, %ax, %ecx, %esi
@@ -201,8 +214,16 @@ _interrupt_and_exception_end:
 .code32
 .type _setup, @function
 _setup:
+    movw $VIDEO_SELECTOR, %ax
+    movw %ax, %es
+    movw $NULL_SELECTOR, %ax
+    movw %ax, %fs
+    movw %ax, %gs
+
+    ljmp $KERNEL_CODE_SELECTOR, $0x00
 
 
+###############################################################
 dummy:
     .space 1024-(.-_start), 0
 
