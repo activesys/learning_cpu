@@ -11,18 +11,34 @@
 .section .text
 .globl _start
 _start:
+    cli
+
     # setup idt
     movl $IDT_BASE, %edi
-    movl $13, %eax
-    movl $EXCEPTION_GP_OFFSET, %ecx
+    call _clear_idt
+
+    movl $8, %eax
+    movl $EXCEPTION_DF_OFFSET, %ecx
     call _setup_idt
 
     movl $10, %eax
     movl $EXCEPTION_TS_OFFSET, %ecx
     call _setup_idt
 
+    movl $11, %eax
+    movl $EXCEPTION_NP_OFFSET, %ecx
+    call _setup_idt
+
     movl $12, %eax
-    movl $EXCEPTION_TS_OFFSET, %ecx
+    movl $EXCEPTION_SS_OFFSET, %ecx
+    call _setup_idt
+
+    movl $13, %eax
+    movl $EXCEPTION_GP_OFFSET, %ecx
+    call _setup_idt
+
+    movl $14, %eax
+    movl $EXCEPTION_PF_OFFSET, %ecx
     call _setup_idt
 
     lidt IDT_POINTER
@@ -177,7 +193,7 @@ _start_end:
 _setup_tss:
     movl $0x1a, %ecx
 _clear_tss:
-    movl $0x00, (%edi, %ecx)
+    movl $0x00, -4(%edi, %ecx, 4)
     loop _clear_tss
 
     movl %eax, 4(%edi)
@@ -186,6 +202,18 @@ _clear_tss:
 
     ret
 
+#
+# %edi is address
+#
+.type _clear_idt, @function
+_clear_idt:
+    movl $0x0100, %ecx
+_do_clear:
+    movl $0x00, -4(%edi, %ecx, 8)
+    movl $0x00, -8(%edi, %ecx, 8)
+    loop _do_clear
+
+    ret
 #
 # %edi is address
 # %eax is interrupt number
@@ -264,6 +292,8 @@ IDT_POINTER:
 .type _setup, @function
 _setup:
     xorl %eax, %eax
+    movw $INT_DATA_SELECTOR, %ax
+    movw %ax, %ds
     movw $INT_STACK_SELECTOR, %ax
     movw %ax, %ss
     movl $INT_STACK_INIT_ESP, %esp
@@ -274,7 +304,6 @@ _setup:
     movw %ax, %gs
 
     ljmp $KERNEL_TSS_SELECTOR, $0x00
-
 
 ###############################################################
 dummy:

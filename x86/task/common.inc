@@ -113,7 +113,7 @@
 
 # interrupt and exception stack
 # attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
-.equ INT_STACK_BASE,            0x3300
+.equ INT_STACK_BASE,            0x3200
 .equ INT_STACK_LIMIT,           0xffff
 .equ INT_STACK_ATTR,            0x4092
 .equ INT_STACK_SELECTOR,        0x20
@@ -234,6 +234,9 @@
 .equ EXCEPTION_GP_OFFSET,       0x00
 .equ EXCEPTION_TS_OFFSET,       0x20
 .equ EXCEPTION_SS_OFFSET,       0x40
+.equ EXCEPTION_DF_OFFSET,       0x60
+.equ EXCEPTION_NP_OFFSET,       0x80
+.equ EXCEPTION_PF_OFFSET,       0xa0
 
 ################################################################
 # data offset and length
@@ -243,6 +246,12 @@
 .equ INT_TS_MSG_LENGTH,         0x10
 .equ INT_SS_MSG_OFFSET,         0x20
 .equ INT_SS_MSG_LENGTH,         0x10
+.equ INT_DF_MSG_OFFSET,         0x30
+.equ INT_DF_MSG_LENGTH,         0x10
+.equ INT_NP_MSG_OFFSET,         0x40
+.equ INT_NP_MSG_LENGTH,         0x10
+.equ INT_PF_MSG_OFFSET,         0x50
+.equ INT_PF_MSG_LENGTH,         0x10
 
 .equ KERNEL_MSG_OFFSET,         0x00
 .equ KERNEL_MSG_LENGTH,         0x19

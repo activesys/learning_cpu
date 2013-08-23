@@ -41,7 +41,7 @@ dummy:
 ###############################################################
 # data for user
 _user_msg:
-    .ascii "In user code, CPL == 3\n"
+    .ascii "In user code, CPL == 3."
 
 dummy1:
     .space 0x200-(.-_start), 0x00

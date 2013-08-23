@@ -41,7 +41,7 @@ dummy:
 ###############################################################
 # data for kernel
 _kernel_msg:
-    .ascii "In kernel code, CPL == 0\n"
+    .ascii "In kernel code, CPL == 0."
 
 dummy1:
     .space 0x200-(.-_start), 0x00
