@@ -1,19 +1,27 @@
+#
+# Boot and read interrupt, setup, kernel user code and data.
+#
+
 .include "common.inc"
 
 .code16
 .section .text
 .globl _start
 _start:
-    # read interrupt handler
+    # read setup
     read_sector $SETUP_SEG, $0x02, $0x02
     jc _read_sector_error
 
+    # read interrupt handler
+    read_sector $INT_SEG, $0x04, $0x01
+    jc _read_sector_error
+
     # read kernel code and data.
-    read_sector $KERNEL_CODE_BASE, $0x04, $0x01
+    read_sector $KERNEL_SEG, $0x05, $0x01
     jc _read_sector_error
 
     # read user code and data.
-    read_sector $USER_CODE_BASE, $0x05, $0x01
+    read_sector $USER_SEG, $0x06, $0x01
     jc _read_sector_error
 
     ljmp $0x00, $SETUP_SEG
@@ -26,7 +34,20 @@ _read_sector_error:
 
     jmp .
 
-.include "echo.inc"
+.type _echo, @function
+_echo:
+    movb $0x0e, %ah
+_do_echo:
+    lodsb
+    int $0x10
+    loop _do_echo
+
+    movb $0x0e, %ah
+    movb $0x0d, %al
+    int $0x10
+    movb $0x0a, %al
+    int $0x10
+    ret
 
 boot_message:
     .ascii "Read sector failure!"

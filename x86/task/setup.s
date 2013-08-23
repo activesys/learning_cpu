@@ -1,3 +1,7 @@
+#
+# Setup IDT, GDT, LDT, TSS and switch to protected-mode.
+#
+
 .include "common.inc"
 
 
@@ -7,20 +11,18 @@
 .section .text
 .globl _start
 _start:
-    # move interrupt handler to interrupt base
-    movw $_interrupt_and_exception_length, %cx
-    movw $_interrupt_and_exception, %si
-    movw $INT_HANDLER_BASE, %di
-    rep movsb
-
     # setup idt
     movl $IDT_BASE, %edi
     movl $13, %eax
     movl $EXCEPTION_GP_OFFSET, %ecx
     call _setup_idt
 
-    movl $0xff, %eax
-    movl $INT_0XFF_OFFSET, %ecx
+    movl $10, %eax
+    movl $EXCEPTION_TS_OFFSET, %ecx
+    call _setup_idt
+
+    movl $12, %eax
+    movl $EXCEPTION_TS_OFFSET, %ecx
     call _setup_idt
 
     lidt IDT_POINTER
@@ -45,48 +47,114 @@ _start:
     call _setup_gdt
 
     addl $0x08, %edi
-    movl $VIDEO_BASE, %eax
-    movl $VIDEO_LIMIT, %ecx
-    movl $VIDEO_ATTR, %esi
+    movl $INT_DATA_BASE, %eax
+    movl $INT_DATA_LIMIT, %ecx
+    movl $INT_DATA_ATTR, %esi
     call _setup_gdt
 
     addl $0x08, %edi
+    movl $INT_STACK_BASE, %eax
+    movl $INT_STACK_LIMIT, %ecx
+    movl $INT_STACK_ATTR, %esi
+    call _setup_gdt
+
+    addl $0x08, %edi
+    movl $INT_VIDEO_BASE, %eax
+    movl $INT_VIDEO_LIMIT, %ecx
+    movl $INT_VIDEO_ATTR, %esi
+    call _setup_gdt
+
+    addl $0x08, %edi
+    movl $KERNEL_TSS_BASE, %eax
+    movl $KERNEL_TSS_LIMIT, %ecx
+    movl $KERNEL_TSS_ATTR, %esi
+    call _setup_gdt
+
+    addl $0x08, %edi
+    movl $KERNEL_LDT_BASE, %eax
+    movl $KERNEL_LDT_LIMIT, %ecx
+    movl $KERNEL_LDT_ATTR, %esi
+    call _setup_gdt
+
+    addl $0x08, %edi
+    movl $USER_TSS_BASE, %eax
+    movl $USER_TSS_LIMIT, %ecx
+    movl $USER_TSS_ATTR, %esi
+    call _setup_gdt
+
+    addl $0x08, %edi
+    movl $USER_LDT_BASE, %eax
+    movl $USER_LDT_LIMIT, %ecx
+    movl $USER_LDT_ATTR, %esi
+    call _setup_gdt
+
+    lgdt GDT_POINTER
+
+    # setup ldt
+    # setup ldt for kernel
+    movl $KERNEL_LDT_BASE, %edi
     movl $KERNEL_CODE_BASE, %eax
     movl $KERNEL_CODE_LIMIT, %ecx
     movl $KERNEL_CODE_ATTR, %esi
-    call _setup_gdt
+    call _setup_ldt
 
     addl $0x08, %edi
     movl $KERNEL_DATA_BASE, %eax
     movl $KERNEL_DATA_LIMIT, %ecx
     movl $KERNEL_DATA_ATTR, %esi
-    call _setup_gdt
+    call _setup_ldt
 
     addl $0x08, %edi
     movl $KERNEL_STACK_BASE, %eax
     movl $KERNEL_STACK_LIMIT, %ecx
     movl $KERNEL_STACK_ATTR, %esi
-    call _setup_gdt
+    call _setup_ldt
 
     addl $0x08, %edi
+    movl $KERNEL_VIDEO_BASE, %eax
+    movl $KERNEL_VIDEO_LIMIT, %ecx
+    movl $KERNEL_VIDEO_ATTR, %esi
+    call _setup_ldt
+
+    # setup ldt for user
+    movl $USER_LDT_BASE, %edi
     movl $USER_CODE_BASE, %eax
     movl $USER_CODE_LIMIT, %ecx
     movl $USER_CODE_ATTR, %esi
-    call _setup_gdt
+    call _setup_ldt
 
     addl $0x08, %edi
     movl $USER_DATA_BASE, %eax
     movl $USER_DATA_LIMIT, %ecx
     movl $USER_DATA_ATTR, %esi
-    call _setup_gdt
+    call _setup_ldt
 
     addl $0x08, %edi
     movl $USER_STACK_BASE, %eax
     movl $USER_STACK_LIMIT, %ecx
     movl $USER_STACK_ATTR, %esi
-    call _setup_gdt
+    call _setup_ldt
 
-    lgdt GDT_POINTER
+    addl $0x08, %edi
+    movl $USER_VIDEO_BASE, %eax
+    movl $USER_VIDEO_LIMIT, %ecx
+    movl $USER_VIDEO_ATTR, %esi
+    call _setup_ldt
+
+    # setup tss
+    # setup tss for kernel
+    movl $KERNEL_TSS_BASE, %edi
+    movl $INT_STACK_INIT_ESP, %eax
+    movl $INT_STACK_SELECTOR, %ebx
+    movl $KERNEL_LDT_SELECTOR, %edx
+    call _setup_tss
+
+    # setup tss for user
+    movl $USER_TSS_BASE, %edi
+    movl $INT_STACK_INIT_ESP, %eax
+    movl $INT_STACK_SELECTOR, %ebx
+    movl $USER_LDT_SELECTOR, %edx
+    call _setup_tss
 
     # switch to protected-mode
     movl %cr0, %eax
@@ -95,6 +163,28 @@ _start:
 
     # far jmp
     ljmp $SETUP_SELECTOR, $_setup
+
+_start_end:
+
+
+#
+# %edi is address
+# %eax esp0
+# %ebx ss0
+# %edx ldt selector
+#
+.type _setup_tss, @function
+_setup_tss:
+    movl $0x1a, %ecx
+_clear_tss:
+    movl $0x00, (%edi, %ecx)
+    loop _clear_tss
+
+    movl %eax, 4(%edi)
+    movw %bx, 8(%edi)
+    movw %dx, 96(%edi)
+
+    ret
 
 #
 # %edi is address
@@ -123,6 +213,8 @@ _setup_idt:
 
     popl %edi
 
+    ret
+
 #
 # %edi is descriptor entry address.
 # %eax is base
@@ -130,7 +222,9 @@ _setup_idt:
 # %esi is attribute
 #
 .type _setup_gdt, @function
+.type _setup_ldt, @function
 _setup_gdt:
+_setup_ldt:
     movl %eax, %ebx
     andl $0x0000ffff, %ebx
     shll $16, %ebx
@@ -164,66 +258,25 @@ IDT_POINTER:
     .short IDT_LIMIT
     .int   IDT_BASE
 
-
-###############################################################
-# Protected-mode code for interrupt handler
-.code32
-_interrupt_and_exception:
-.type _gp, @function
-_gp:
-    movl $GP_MSG_OFFSET, %esi
-    movl $GP_MSG_LEN_OFFSET, %eax
-    movl %ds:(%eax), %ecx
-    call _int_echo
-
-    jmp .
-    iret
-
-.space 0x20-(.-_interrupt_and_exception), 0x00
-.type _int_0xff, @function
-_int_0xff:
-    call _int_echo
-
-    iret
-
-# %edi, %ax, %ecx, %esi
-.type _int_echo, @function
-_int_echo:
-    xorl %ebx, %ebx
-    movl %ebx, %edi
-    shll %edi
-    movb $0x0c, %ah
-_int_start_echo:
-    movb %ds:(%esi), %al
-    movw %ax, %es:(%edi)
-
-    inc %ebx
-    movl %ebx, %edi
-    shll %edi
-    inc %esi
-    loop _int_start_echo 
-
-    ret
-
-_interrupt_and_exception_end:
-.equ _interrupt_and_exception_length, _interrupt_and_exception_end - _interrupt_and_exception
-
-
 ###############################################################
 # Protected-mode code for setup
 .code32
 .type _setup, @function
 _setup:
-    movw $VIDEO_SELECTOR, %ax
+    xorl %eax, %eax
+    movw $INT_STACK_SELECTOR, %ax
+    movw %ax, %ss
+    movl $INT_STACK_INIT_ESP, %esp
+    movw $INT_VIDEO_SELECTOR, %ax
     movw %ax, %es
     movw $NULL_SELECTOR, %ax
     movw %ax, %fs
     movw %ax, %gs
 
-    ljmp $KERNEL_CODE_SELECTOR, $0x00
+    ljmp $KERNEL_TSS_SELECTOR, $0x00
 
 
 ###############################################################
 dummy:
-    .space 1024-(.-_start), 0
+    .space 1024-(.-_start), 0x00
 

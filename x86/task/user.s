@@ -1,4 +1,7 @@
+#
 # code and data for user
+#
+
 .include "common.inc"
 
 ###############################################################
@@ -6,20 +9,31 @@
 .code32
 .globl _start
 _start:
-    xorl %eax, %eax
-    movw $USER_DATA_SELECTOR, %ax
-    movw %ax, %ds
-    movw $USER_STACK_SELECTOR, %ax
-    movw %ax, %ss
-    movl $USER_STACK_INIT_ESP, %esp
-
-    /*
-    movl $0x00, %esi
-    movl $_user_msg_len, %ecx
-    int $0xff
-    */
+    movl $USER_MSG_OFFSET, %edi
+    movl $USER_MSG_LENGTH, %ecx
+    call _user_echo
 
     jmp .
+
+# %edi, %ax, %ecx, %esi
+.type _user_echo, @function
+_user_echo:
+    movl $800, %edx
+    xorl %ebx, %ebx
+    leal (%edx, %ebx), %edi
+    shll %edi
+    movb $0x0c, %ah
+_user_start_echo:
+    movb %ds:(%esi), %al
+    movw %ax, %es:(%edi)
+
+    inc %ebx
+    leal (%edx, %ebx), %edi
+    shll %edi
+    inc %esi
+    loop _user_start_echo 
+
+    ret
 
 dummy:
     .space 0x100-(.-_start), 0x00
@@ -27,9 +41,7 @@ dummy:
 ###############################################################
 # data for user
 _user_msg:
-    .ascii "In user code, CPL == 3"
-_user_msg_end:
-    .equ _user_msg_len, _user_msg_end - _user_msg
+    .ascii "In user code, CPL == 3\n"
 
 dummy1:
     .space 0x200-(.-_start), 0x00

@@ -1,17 +1,19 @@
+#
+# Common data and struct
+#
 # memory layout
 /*
 |                |
 +----------------+ 0x0b8000 video buffer (%es)
 |                |
 |                |
-+----------------+ 0x051000 user stack %esp
++----------------+ 0xb000 user stack %esp
 |                |
-+                + 0x050200 user stack
++                + 0xa200 user stack
 |    user        |
-+                + 0x050100 user data
++                + 0xa100 user data
 |                |
-+----------------+ 0x050000 user code
-|                |
++----------------+ 0xa000 user code
 |                |
 +----------------+ 0x9000 kernel stack %esp
 |                |
@@ -46,8 +48,9 @@
 # content address.
 .equ BOOT_SEG,      0x7c00
 .equ SETUP_SEG,     0x6000
+.equ INT_SEG,       0x3000
 .equ KERNEL_SEG,    0x8000
-.equ USER_SEQ,      0x050000
+.equ USER_SEG,      0xa000
 
 ################################################################
 # GDT layout
@@ -63,9 +66,13 @@
    |    +----------------+                  |                |     +--------+
    |    | kernel TSS     +-------1--------->+----------------+<----+ TR     |
    |    +----------------+                                         +--------+
-   |    | interrupt LDT  |
+   |    | interrupt video|
    |    +----------------+
-   |    | interrupt TSS  |                  +----------------+
+   |    | interrupt stack|
+   |    +----------------+
+   |    | interrupt data |
+   |    +----------------+
+   |    | interrupt code |                  +----------------+
    |    +----------------+                  |                |
    |    |setup descriptor|                  |                |
    |    +----------------+                  |   kernel LDT   |
@@ -83,54 +90,69 @@
 .equ NULL_DESCRIPTOR_ATTR,      0x00
 .equ NULL_SELECTOR,             0x00
 
-# interrupt and exception handler
+# setup code
 # attr = 0x4098(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=1000)
 .equ SETUP_BASE,                0x0000
 .equ SETUP_LIMIT,               0xffff
 .equ SETUP_ATTR,                0x4098
 .equ SETUP_SELECTOR,            0x08
 
-# interrupt and exception TSS
-# attr = 0x0089(G=0,D/B=0,L=0,AVL=0,P=1,DPL=00,S=0,TYPE=1001)
-.equ INT_TSS_BASE,              0x1000
-.equ INT_TSS_LIMIT,             0xffff
-.equ INT_TSS_ATTR,              0x0089
-.equ INT_TSS_SELECTOR,          0x10
+# interrupt and exception handler
+# attr = 0x4098(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=1000)
+.equ INT_HANDLER_BASE,          0x3000
+.equ INT_HANDLER_LIMIT,         0xffff
+.equ INT_HANDLER_ATTR,          0x4098
+.equ INT_HANDLER_SELECTOR,      0x10
 
-# interrupt and exception LDT
-# attr = 0x0082(G=0,D/B=0,L=0,AVL=0,P=1,DPL=00,S=0,TYPE=0010)
-.equ INT_LDT_BASE,              0x2000
-.equ INT_LDT_LIMIT,             0xffff
-.equ INT_LDT_ATTR,              0x0082
-.equ INT_LDT_SELECTOR,          0x18
+# interrupt and exception data
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ INT_DATA_BASE,             0x3100
+.equ INT_DATA_LIMIT,            0xffff
+.equ INT_DATA_ATTR,             0x4092
+.equ INT_DATA_SELECTOR,         0x18
+
+# interrupt and exception stack
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ INT_STACK_BASE,            0x3300
+.equ INT_STACK_LIMIT,           0xffff
+.equ INT_STACK_ATTR,            0x4092
+.equ INT_STACK_SELECTOR,        0x20
+.equ INT_STACK_INIT_ESP,        0x4000
+
+# interrupt and exception video
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ INT_VIDEO_BASE,            0x0b8000
+.equ INT_VIDEO_LIMIT,           0xffff
+.equ INT_VIDEO_ATTR,            0x4092
+.equ INT_VIDEO_SELECTOR,        0x28
 
 # kernel TSS
 # attr = 0x0089(G=0,D/B=0,L=0,AVL=0,P=1,DPL=00,S=0,TYPE=1001)
-.equ KERNEL_TSS_BASE,           0x1068
+.equ KERNEL_TSS_BASE,           0x1000
 .equ KERNEL_TSS_LIMIT,          0xffff
 .equ KERNEL_TSS_ATTR,           0x0089
-.equ KERNEL_TSS_SELECTOR,       0x20
+.equ KERNEL_TSS_SELECTOR,       0x30
 
 # kernel LDT
 # attr = 0x0082(G=0,D/B=0,L=0,AVL=0,P=1,DPL=00,S=0,TYPE=0010)
-.equ KERNEL_LDT_BASE,           0x2020
+.equ KERNEL_LDT_BASE,           0x2000
 .equ KERNEL_LDT_LIMIT,          0xffff
 .equ KERNEL_LDT_ATTR,           0x0082
-.equ KERNEL_LDT_SELECTOR,       0x28
+.equ KERNEL_LDT_SELECTOR,       0x38
 
 # user TSS
 # attr = 0x00e9(G=0,D/B=0,L=0,AVL=0,P=1,DPL=11,S=0,TYPE=1001)
-.equ USER_TSS_BASE,             0x10d0
+.equ USER_TSS_BASE,             0x1068
 .equ USER_TSS_LIMIT,            0xffff
 .equ USER_TSS_ATTR,             0x00e9
-.equ USER_TSS_SELECTOR,         0x30
+.equ USER_TSS_SELECTOR,         0x43
 
 # user LDT
 # attr = 0x00e2(G=0,D/B=1,L=0,AVL=0,P=1,DPL=11,S=0,TYPE=0010)
-.equ USER_LDT_BASE,             0x2040
+.equ USER_LDT_BASE,             0x2020
 .equ USER_LDT_LIMIT,            0xffff
 .equ USER_LDT_ATTR,             0x00e2
-.equ USER_LDT_SELECTOR,         0x38
+.equ USER_LDT_SELECTOR,         0x4b
 
 ################################################################
 # LDT layout
@@ -146,52 +168,94 @@
 |code  descriptor|
 +----------------+
 */
-# interrupt and exception LDT
-# interrupt and exception handler
+# kernel LDT
+# kernel code
 # attr = 0x4098(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=1000)
-.equ INT_HANDLER_BASE,          0x3000
-.equ INT_HANDLER_LIMIT,         0xffff
-.equ INT_HANDLER_ATTR,          0x4098
-.equ INT_HANDLER_SELECTOR,      0x04
+.equ KERNEL_CODE_BASE,          0x8000
+.equ KERNEL_CODE_LIMIT,         0xffff
+.equ KERNEL_CODE_ATTR,          0x4098
+.equ KERNEL_CODE_SELECTOR,      0x04
 
-# interrupt and exception data
+# kernel data
 # attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
-.equ INT_DATA_BASE,             0x3100
-.equ INT_DATA_LIMIT,            0xffff
-.equ INT_DATA_ATTR,             0x4092
-.equ INT_DATA_SELECTOR,         0x0c
+.equ KERNEL_DATA_BASE,          0x8100
+.equ KERNEL_DATA_LIMIT,         0xffff
+.equ KERNEL_DATA_ATTR,          0x4092
+.equ KERNEL_DATA_SELECTOR,      0x0c
 
-# interrupt and exception stack
+# kernel stack
 # attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
-.equ INT_STACK_BASE,            0x3200
-.equ INT_STACK_LIMIT,           0xffff
-.equ INT_STACK_ATTR,            0x4092
-.equ INT_STACK_SELECTOR,        0x14
+.equ KERNEL_STACK_BASE,         0x8200
+.equ KERNEL_STACK_LIMIT,        0xffff
+.equ KERNEL_STACK_ATTR,         0x4092
+.equ KERNEL_STACK_SELECTOR,     0x14
+.equ KERNEL_STACK_INIT_ESP,     0x9000
 
 # video data segment
 # attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
-.equ INT_VIDEO_BASE,            0x0b8000
-.equ INT_VIDEO_LIMIT,           0xffff
-.equ INT_VIDEO_ATTR,            0x4092
-.equ INT_VIDEO_SELECTOR,        0x1c
+.equ KERNEL_VIDEO_BASE,         0x0b8000
+.equ KERNEL_VIDEO_LIMIT,        0xffff
+.equ KERNEL_VIDEO_ATTR,         0x4092
+.equ KERNEL_VIDEO_SELECTOR,     0x1c
 
-# kernel LDT
+# user LDT
+# user code
+# attr = 0x4098(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=1000)
+.equ USER_CODE_BASE,            0xa000
+.equ USER_CODE_LIMIT,           0xffff
+.equ USER_CODE_ATTR,            0x4098
+.equ USER_CODE_SELECTOR,        0x07
 
+# user data
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ USER_DATA_BASE,            0xa100
+.equ USER_DATA_LIMIT,           0xffff
+.equ USER_DATA_ATTR,            0x4092
+.equ USER_DATA_SELECTOR,        0x0f
+
+# user stack
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ USER_STACK_BASE,           0xa200
+.equ USER_STACK_LIMIT,          0xffff
+.equ USER_STACK_ATTR,           0x4092
+.equ USER_STACK_SELECTOR,       0x17
+.equ USER_STACK_INIT_ESP,       0xb000
+
+# video data segment
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ USER_VIDEO_BASE,           0x0b8000
+.equ USER_VIDEO_LIMIT,          0xffff
+.equ USER_VIDEO_ATTR,           0x4092
+.equ USER_VIDEO_SELECTOR,       0x1f
 
 
 ################################################################
 # for IDT
 .equ EXCEPTION_GP_OFFSET,       0x00
-.equ INT_0XFF_OFFSET,           0x20
+.equ EXCEPTION_TS_OFFSET,       0x20
+.equ EXCEPTION_SS_OFFSET,       0x40
 
+################################################################
+# data offset and length
+.equ INT_GP_MSG_OFFSET,         0x00 
+.equ INT_GP_MSG_LENGTH,         0x10
+.equ INT_TS_MSG_OFFSET,         0x10
+.equ INT_TS_MSG_LENGTH,         0x10
+.equ INT_SS_MSG_OFFSET,         0x20
+.equ INT_SS_MSG_LENGTH,         0x10
+
+.equ KERNEL_MSG_OFFSET,         0x00
+.equ KERNEL_MSG_LENGTH,         0x19
+
+.equ USER_MSG_OFFSET,           0x00
+.equ USER_MSG_LENGTH,           0x17
+
+################################################################
+# contents for GDT and IDT
 .equ GDT_BASE,                  0x0800
-.equ GDT_LIMIT,                 0x50
+.equ GDT_LIMIT,                 0xff
 .equ IDT_BASE,                  0x00
 .equ IDT_LIMIT,                 0x07ff
-
-# for access data
-.equ GP_MSG_OFFSET,             0x40 
-.equ GP_MSG_LEN_OFFSET,         0x80
 
 ################################################################
 # read sector macro
