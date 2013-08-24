@@ -164,6 +164,11 @@ _start:
     movl $INT_STACK_SELECTOR, %ebx
     movl $KERNEL_LDT_SELECTOR, %edx
     call _setup_tss
+    movl $KERNEL_CODE_SELECTOR, %eax
+    movl $KERNEL_DATA_SELECTOR, %ebx
+    movl $KERNEL_STACK_SELECTOR, %ecx
+    movl $KERNEL_VIDEO_SELECTOR, %edx
+    call _setup_tss_segment
 
     # setup tss for user
     movl $USER_TSS_BASE, %edi
@@ -171,6 +176,11 @@ _start:
     movl $INT_STACK_SELECTOR, %ebx
     movl $USER_LDT_SELECTOR, %edx
     call _setup_tss
+    movl $USER_CODE_SELECTOR, %eax
+    movl $USER_DATA_SELECTOR, %ebx
+    movl $USER_STACK_SELECTOR, %ecx
+    movl $USER_VIDEO_SELECTOR, %edx
+    call _setup_tss_segment
 
     # switch to protected-mode
     movl %cr0, %eax
@@ -200,6 +210,21 @@ _clear_tss:
     movw %bx, 8(%edi)
     movw %dx, 96(%edi)
 
+    ret
+
+#
+# %edi is address
+# %eax cs
+# %ebx ds
+# %ecx ss
+# %edx es
+#
+.type _setup_tss_segment, @function
+_setup_tss_segment:
+    movw %ax, 76(%edi)
+    movw %bx, 84(%edi)
+    movw %cx, 80(%edi)
+    movw %dx, 72(%edi)
     ret
 
 #
@@ -302,6 +327,9 @@ _setup:
     movw $NULL_SELECTOR, %ax
     movw %ax, %fs
     movw %ax, %gs
+
+    movl $SETUP_TSS_SELECTOR, %eax
+    ltr %ax
 
     ljmp $KERNEL_TSS_SELECTOR, $0x00
 

@@ -72,7 +72,9 @@
    |    +----------------+
    |    | interrupt data |
    |    +----------------+
-   |    | interrupt code |                  +----------------+
+   |    | interrupt code |
+   |    +----------------+
+   |    | setup TSS      |                  +----------------+
    |    +----------------+                  |                |
    |    |setup descriptor|                  |                |
    |    +----------------+                  |   kernel LDT   |
@@ -97,26 +99,33 @@
 .equ SETUP_ATTR,                0x4098
 .equ SETUP_SELECTOR,            0x08
 
+# setup TSS
+# attr = 0x0089(G=0,D/B=0,L=0,AVL=0,P=1,DPL=00,S=0,TYPE=1001)
+.equ SETUP_TSS_BASE,            0x10d0
+.equ SETUP_TSS_LIMIT,           0xffff
+.equ SETUP_TSS_ATTR,            0x0089
+.equ SETUP_TSS_SELECTOR,        0x10
+
 # interrupt and exception handler
 # attr = 0x4098(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=1000)
 .equ INT_HANDLER_BASE,          0x3000
 .equ INT_HANDLER_LIMIT,         0xffff
 .equ INT_HANDLER_ATTR,          0x4098
-.equ INT_HANDLER_SELECTOR,      0x10
+.equ INT_HANDLER_SELECTOR,      0x18
 
 # interrupt and exception data
 # attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
 .equ INT_DATA_BASE,             0x3100
 .equ INT_DATA_LIMIT,            0xffff
 .equ INT_DATA_ATTR,             0x4092
-.equ INT_DATA_SELECTOR,         0x18
+.equ INT_DATA_SELECTOR,         0x20
 
 # interrupt and exception stack
 # attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
 .equ INT_STACK_BASE,            0x3200
 .equ INT_STACK_LIMIT,           0xffff
 .equ INT_STACK_ATTR,            0x4092
-.equ INT_STACK_SELECTOR,        0x20
+.equ INT_STACK_SELECTOR,        0x28
 .equ INT_STACK_INIT_ESP,        0x4000
 
 # interrupt and exception video
@@ -124,35 +133,35 @@
 .equ INT_VIDEO_BASE,            0x0b8000
 .equ INT_VIDEO_LIMIT,           0xffff
 .equ INT_VIDEO_ATTR,            0x4092
-.equ INT_VIDEO_SELECTOR,        0x28
+.equ INT_VIDEO_SELECTOR,        0x30
 
 # kernel TSS
 # attr = 0x0089(G=0,D/B=0,L=0,AVL=0,P=1,DPL=00,S=0,TYPE=1001)
 .equ KERNEL_TSS_BASE,           0x1000
 .equ KERNEL_TSS_LIMIT,          0xffff
 .equ KERNEL_TSS_ATTR,           0x0089
-.equ KERNEL_TSS_SELECTOR,       0x30
+.equ KERNEL_TSS_SELECTOR,       0x38
 
 # kernel LDT
 # attr = 0x0082(G=0,D/B=0,L=0,AVL=0,P=1,DPL=00,S=0,TYPE=0010)
 .equ KERNEL_LDT_BASE,           0x2000
 .equ KERNEL_LDT_LIMIT,          0xffff
 .equ KERNEL_LDT_ATTR,           0x0082
-.equ KERNEL_LDT_SELECTOR,       0x38
+.equ KERNEL_LDT_SELECTOR,       0x40
 
 # user TSS
 # attr = 0x00e9(G=0,D/B=0,L=0,AVL=0,P=1,DPL=11,S=0,TYPE=1001)
 .equ USER_TSS_BASE,             0x1068
 .equ USER_TSS_LIMIT,            0xffff
 .equ USER_TSS_ATTR,             0x00e9
-.equ USER_TSS_SELECTOR,         0x43
+.equ USER_TSS_SELECTOR,         0x4b
 
 # user LDT
 # attr = 0x00e2(G=0,D/B=1,L=0,AVL=0,P=1,DPL=11,S=0,TYPE=0010)
 .equ USER_LDT_BASE,             0x2020
 .equ USER_LDT_LIMIT,            0xffff
 .equ USER_LDT_ATTR,             0x00e2
-.equ USER_LDT_SELECTOR,         0x4b
+.equ USER_LDT_SELECTOR,         0x53
 
 ################################################################
 # LDT layout
