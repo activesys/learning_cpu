@@ -37,7 +37,7 @@ rm -f kernel kernel.o kernel.bin
 
 # build user
 as -o user.o user.s
-ld -Ttext 0x050000 -o user user.o
+ld -Ttext 0xa000 -o user user.o
 objcopy -O binary user user.bin
 dd if=user.bin of=boot.img count=1 seek=5
 rm -f user user.o user.bin

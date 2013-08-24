@@ -57,6 +57,12 @@ _start:
     call _setup_gdt
 
     addl $0x08, %edi
+    movl $SETUP_TSS_BASE, %eax
+    movl $SETUP_TSS_LIMIT, %ecx
+    movl $SETUP_TSS_ATTR, %esi
+    call _setup_gdt
+
+    addl $0x08, %edi
     movl $INT_HANDLER_BASE, %eax
     movl $INT_HANDLER_LIMIT, %ecx
     movl $INT_HANDLER_ATTR, %esi

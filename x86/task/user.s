@@ -9,16 +9,18 @@
 .code32
 .globl _start
 _start:
+    movl $USER_STACK_INIT_ESP, %esp
+
     movl $USER_MSG_OFFSET, %edi
     movl $USER_MSG_LENGTH, %ecx
+    movl $USER_FIRST_VIDEO_OFFSET, %edx
     call _user_echo
 
-    jmp .
+    iret
 
 # %edi, %ax, %ecx, %esi
 .type _user_echo, @function
 _user_echo:
-    movl $800, %edx
     xorl %ebx, %ebx
     leal (%edx, %ebx), %edi
     shll %edi

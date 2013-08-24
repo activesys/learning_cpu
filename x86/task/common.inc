@@ -209,32 +209,32 @@
 
 # user LDT
 # user code
-# attr = 0x4098(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=1000)
+# attr = 0x4098(G=0,D/B=1,L=0,AVL=0,P=1,DPL=11,S=1,TYPE=1000)
 .equ USER_CODE_BASE,            0xa000
 .equ USER_CODE_LIMIT,           0xffff
-.equ USER_CODE_ATTR,            0x4098
+.equ USER_CODE_ATTR,            0x40f8
 .equ USER_CODE_SELECTOR,        0x07
 
 # user data
-# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=11,S=1,TYPE=0010)
 .equ USER_DATA_BASE,            0xa100
 .equ USER_DATA_LIMIT,           0xffff
-.equ USER_DATA_ATTR,            0x4092
+.equ USER_DATA_ATTR,            0x40f2
 .equ USER_DATA_SELECTOR,        0x0f
 
 # user stack
-# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=11,S=1,TYPE=0010)
 .equ USER_STACK_BASE,           0xa200
 .equ USER_STACK_LIMIT,          0xffff
-.equ USER_STACK_ATTR,           0x4092
+.equ USER_STACK_ATTR,           0x40f2
 .equ USER_STACK_SELECTOR,       0x17
 .equ USER_STACK_INIT_ESP,       0xb000
 
 # video data segment
-# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=11,S=1,TYPE=0010)
 .equ USER_VIDEO_BASE,           0x0b8000
 .equ USER_VIDEO_LIMIT,          0xffff
-.equ USER_VIDEO_ATTR,           0x4092
+.equ USER_VIDEO_ATTR,           0x40f2
 .equ USER_VIDEO_SELECTOR,       0x1f
 
 
@@ -264,9 +264,17 @@
 
 .equ KERNEL_MSG_OFFSET,         0x00
 .equ KERNEL_MSG_LENGTH,         0x19
+.equ KERNEL_MSG2_OFFSET,        0x19
+.equ KERNEL_MSG2_LENGTH,        0x2a
 
 .equ USER_MSG_OFFSET,           0x00
 .equ USER_MSG_LENGTH,           0x17
+
+################################################################
+# video offset
+.equ KERNEL_FIRST_VIDEO_OFFSET, 0x0190
+.equ KERNEL_SECOND_VIDEO_OFFSET,0x0230
+.equ USER_FIRST_VIDEO_OFFSET,   0x01e0
 
 ################################################################
 # contents for GDT and IDT

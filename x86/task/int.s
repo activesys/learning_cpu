@@ -12,6 +12,12 @@ _start:
 # Exception #GP handler
 .type _gp, @function
 _gp:
+    xorl %eax, %eax
+    movw $INT_DATA_SELECTOR, %ax
+    movw %ax, %ds
+    movw $INT_VIDEO_SELECTOR, %ax
+    movw %ax, %es
+
     movl $INT_GP_MSG_OFFSET, %esi
     movl $INT_GP_MSG_LENGTH, %ecx
     call _int_echo
@@ -24,6 +30,12 @@ _gp:
 # Exception #TS handler
 .type _ts, @function
 _ts:
+    xorl %eax, %eax
+    movw $INT_DATA_SELECTOR, %ax
+    movw %ax, %ds
+    movw $INT_VIDEO_SELECTOR, %ax
+    movw %ax, %es
+
     movl $INT_TS_MSG_OFFSET, %esi
     movl $INT_TS_MSG_LENGTH, %ecx
     call _int_echo
@@ -36,6 +48,12 @@ _ts:
 # Exception #SS handler
 .type _ss, @function
 _ss:
+    xorl %eax, %eax
+    movw $INT_DATA_SELECTOR, %ax
+    movw %ax, %ds
+    movw $INT_VIDEO_SELECTOR, %ax
+    movw %ax, %es
+
     movl $INT_SS_MSG_OFFSET, %esi
     movl $INT_SS_MSG_LENGTH, %ecx
     call _int_echo
@@ -48,6 +66,12 @@ _ss:
 # Exception #DF handler
 .type _df, @function
 _df:
+    xorl %eax, %eax
+    movw $INT_DATA_SELECTOR, %ax
+    movw %ax, %ds
+    movw $INT_VIDEO_SELECTOR, %ax
+    movw %ax, %es
+
     movl $INT_DF_MSG_OFFSET, %esi
     movl $INT_DF_MSG_LENGTH, %ecx
     call _int_echo
@@ -60,6 +84,12 @@ _df:
 # Exception #NP handler
 .type _np, @function
 _np:
+    xorl %eax, %eax
+    movw $INT_DATA_SELECTOR, %ax
+    movw %ax, %ds
+    movw $INT_VIDEO_SELECTOR, %ax
+    movw %ax, %es
+
     movl $INT_NP_MSG_OFFSET, %esi
     movl $INT_NP_MSG_LENGTH, %ecx
     call _int_echo
@@ -72,6 +102,12 @@ _np:
 # Exception #PF handler
 .type _pf, @function
 _pf:
+    xorl %eax, %eax
+    movw $INT_DATA_SELECTOR, %ax
+    movw %ax, %ds
+    movw $INT_VIDEO_SELECTOR, %ax
+    movw %ax, %es
+
     movl $INT_PF_MSG_OFFSET, %esi
     movl $INT_PF_MSG_LENGTH, %ecx
     call _int_echo

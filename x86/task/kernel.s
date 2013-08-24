@@ -8,17 +8,26 @@
 .code32
 .globl _start
 _start:
+    movl $KERNEL_STACK_INIT_ESP, %esp
+
     movl $KERNEL_MSG_OFFSET, %edi
     movl $KERNEL_MSG_LENGTH, %ecx
+    movl $KERNEL_FIRST_VIDEO_OFFSET, %edx
     call _kernel_echo
 
     # jmp to user code.
     lcall $USER_TSS_SELECTOR, $0x00
 
+    movl $KERNEL_MSG2_OFFSET, %edi
+    movl $KERNEL_MSG2_LENGTH, %ecx
+    movl $KERNEL_SECOND_VIDEO_OFFSET, %edx
+    call _kernel_echo
+
+    jmp .
+
 # %edi, %ax, %ecx, %esi
 .type _kernel_echo, @function
 _kernel_echo:
-    movl $400, %edx
     xorl %ebx, %ebx
     leal (%edx, %ebx), %edi
     shll %edi
@@ -42,6 +51,8 @@ dummy:
 # data for kernel
 _kernel_msg:
     .ascii "In kernel code, CPL == 0."
+_kernel_msg2:
+    .ascii "Welcome back to the kernel code, CPL == 0."
 
 dummy1:
     .space 0x200-(.-_start), 0x00
