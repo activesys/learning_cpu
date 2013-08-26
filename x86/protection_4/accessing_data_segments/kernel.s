@@ -15,12 +15,32 @@ _start:
     movl $KERNEL_FIRST_VIDEO_OFFSET, %edx
     call _kernel_echo
 
+    pushw %ds
+
+    # load test data DPL == 0
+    movl $TEST_DATA_DPL0_SELECTOR_RPL0, %eax
+    movw %ax, %ds
+    movl $TEST_DATA_CPL0_DPL0_MSG_OFFSET, %esi
+    movl $TEST_DATA_CPL0_DPL0_MSG_LENGTH, %ecx
+    movl $CPL0_DPL0_VIDEO_OFFSET, %edx
+    call _kernel_echo
+
     # jmp to user code.
     lcall $USER_TSS_SELECTOR, $0x00
+
+    popw %ds
 
     movl $KERNEL_MSG2_OFFSET, %esi
     movl $KERNEL_MSG2_LENGTH, %ecx
     movl $KERNEL_SECOND_VIDEO_OFFSET, %edx
+    call _kernel_echo
+
+    # load test data DPL == 3
+    movl $TEST_DATA_DPL3_SELECTOR_RPL0, %eax
+    movw %ax, %ds
+    movl $TEST_DATA_CPL0_DPL3_MSG_OFFSET, %esi
+    movl $TEST_DATA_CPL0_DPL3_MSG_LENGTH, %ecx
+    movl $CPL0_DPL3_VIDEO_OFFSET, %edx
     call _kernel_echo
 
     jmp .

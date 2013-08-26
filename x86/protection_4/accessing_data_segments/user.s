@@ -16,6 +16,14 @@ _start:
     movl $USER_FIRST_VIDEO_OFFSET, %edx
     call _user_echo
 
+    # load test data DPL == 3
+    movl $TEST_DATA_DPL3_SELECTOR_RPL3, %eax
+    movw %ax, %ds
+    movl $TEST_DATA_CPL3_DPL3_MSG_OFFSET, %esi
+    movl $TEST_DATA_CPL3_DPL3_MSG_LENGTH, %ecx
+    movl $CPL3_DPL3_VIDEO_OFFSET, %edx
+    call _user_echo
+
     iret
 
 # %edi, %ax, %ecx, %esi
