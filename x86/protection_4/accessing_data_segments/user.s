@@ -24,6 +24,9 @@ _start:
     movl $CPL3_DPL3_VIDEO_OFFSET, %edx
     call _user_echo
 
+    #movl $TEST_DATA_DPL0_SELECTOR_RPL0, %eax
+    #movw %ax, %ds
+
     iret
 
 # %edi, %ax, %ecx, %esi

@@ -9,19 +9,19 @@
 .globl _start
 _start:
     # read setup
-    read_sector $SETUP_SEG, $0x02, $0x02
+    read_sector $SETUP_SEG, $0x02, $0x03
     jc _read_sector_error
 
     # read interrupt handler
-    read_sector $INT_SEG, $0x04, $0x01
+    read_sector $INT_SEG, $0x05, $0x01
     jc _read_sector_error
 
     # read kernel code and data.
-    read_sector $KERNEL_SEG, $0x05, $0x01
+    read_sector $KERNEL_SEG, $0x06, $0x01
     jc _read_sector_error
 
     # read user code and data.
-    read_sector $USER_SEG, $0x06, $0x01
+    read_sector $USER_SEG, $0x07, $0x01
     jc _read_sector_error
 
     ljmp $0x00, $SETUP_SEG

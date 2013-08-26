@@ -222,6 +222,7 @@
 .equ KERNEL_STACK_LIMIT,        0xffff
 .equ KERNEL_STACK_ATTR,         0x4092
 .equ KERNEL_STACK_SELECTOR,     0x14
+.equ KERNEL_STACK_SELECTOR_RPL3,0x17
 .equ KERNEL_STACK_INIT_ESP,     0x9000
 
 # video data segment

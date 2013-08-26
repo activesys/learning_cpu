@@ -43,6 +43,12 @@ _start:
     movl $CPL0_DPL3_VIDEO_OFFSET, %edx
     call _kernel_echo
 
+    #movl $TEST_DATA_DPL0_SELECTOR_RPL3, %eax
+    #movw %ax, %ds
+
+    #movl $KERNEL_STACK_SELECTOR_RPL3, %eax
+    #movw %ax, %ss
+
     jmp .
 
 # %edi, %ax, %ecx, %esi

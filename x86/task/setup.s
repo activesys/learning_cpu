@@ -334,12 +334,39 @@ _setup:
     movw %ax, %fs
     movw %ax, %gs
 
+    call _clear_screen
+
     movl $SETUP_TSS_SELECTOR, %eax
     ltr %ax
 
     ljmp $KERNEL_TSS_SELECTOR, $0x00
 
+# %edi, %ax, %ecx, %esi
+.type _clear_screen, @function
+_clear_screen:
+    xorl %edx, %edx
+_start_clear_screen:
+    xorl %ebx, %ebx
+    leal (%edx, %ebx), %edi
+    shll %edi
+    movl $80, %ecx
+    movb $0x0c, %ah
+_do_clear_screen:
+    movb $0x20, %al
+    movw %ax, %es:(%edi)
+
+    inc %ebx
+    leal (%edx, %ebx), %edi
+    shll %edi
+    loop _do_clear_screen 
+
+    addl $80, %edx
+    cmp $1600, %edx
+    jnz _start_clear_screen
+
+    ret
+
 ###############################################################
 dummy:
-    .space 1024-(.-_start), 0x00
+    .space 0x600-(.-_start), 0x00
 
