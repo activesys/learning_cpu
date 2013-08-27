@@ -36,7 +36,7 @@ _start:
     call _kernel_echo
 
     # load test data DPL == 3
-    movl $TEST_DATA_DPL3_SELECTOR_RPL0, %eax
+    movl $TEST_DATA_DPL3_SELECTOR_RPL3, %eax
     movw %ax, %ds
     movl $TEST_DATA_CPL0_DPL3_MSG_OFFSET, %esi
     movl $TEST_DATA_CPL0_DPL3_MSG_LENGTH, %ecx
