@@ -18,6 +18,53 @@ _start:
 
     jmp .
 
+
+################################
+# read sector
+#
+.type read_sector, @function
+read_sector:
+    pushw %es
+    pushl %eax
+    movw buffer_selector, %es
+
+    movl $start_sector, %eax
+    cmpl $0x00, 4(%eax)
+    jnz _check_lba
+
+_check_lba:
+    call check_int0x13_extension
+    testw %ax, %ax
+    jz _chs_mode
+
+_lba_mode:
+    call read_sector_with_extension
+    testw %ax, %ax
+    jz _read_sector_done
+
+_chs_mode:
+    call read_sector_with_chs
+
+_read_sector_done:
+    popl %eax
+    popw %es
+    ret
+
+################################
+# read sector with chs
+#
+.type read_sector_with_chs, @function
+read_sector_with_chs:
+    call lba_to_chs
+    movb read_sectors, %al
+    movb driver_number, %dl
+    movw buffer_selector, %es
+    movw buffer_offset, %bx
+    movb $0x02, %ah
+    int $0x13
+    movzx %ah, %ax
+    ret
+
 ################################
 # LBA to CHS
 # LBA = C * (header_maximun * sector_maximun) + H * sector_maximun + S - 1
@@ -28,7 +75,8 @@ lba_to_chs:
     movzx header_maximun, %eax
     imul %eax, %ecx
     movl start_sector, %eax
-    movl start_sector(,4), %edx
+    movl $start_sector, %ebx
+    movl 4(%ebx), %edx
     divl %ecx
     movl %eax, %ebx
     movl %edx, %eax
