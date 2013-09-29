@@ -18,6 +18,31 @@ _start:
 
     jmp .
 
+################################
+# LBA to CHS
+# LBA = C * (header_maximun * sector_maximun) + H * sector_maximun + S - 1
+#
+.type lba_to_chs, @function
+lba_to_chs:
+    movzx sector_maximun, %ecx
+    movzx header_maximun, %eax
+    imul %eax, %ecx
+    movl start_sector, %eax
+    movl start_sector(,4), %edx
+    divl %ecx
+    movl %eax, %ebx
+    movl %edx, %eax
+    xorl %edx, %edx
+    movzx sector_maximun, %ecx
+    divl %ecx
+    incl %edx
+    movb %dl, %cl
+    movb %bl, %ch
+    shrw $0x02, %bx
+    andw $0xc0, %bx
+    orb %bl, %cl
+    movb %al, %dh
+    ret
 
 ################################
 # read sector with extension
