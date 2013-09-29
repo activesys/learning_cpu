@@ -20,6 +20,30 @@ _start:
 
 
 ################################
+# load module
+#
+.type load_module, @function
+load_module:
+    movw $0x01, read_sectors
+    call read_sector
+    testw %ax, %ax
+    jnz _load_module_done
+    movw buffer_offset, %si
+    movzx %si, %esi
+    movw buffer_selector, %es
+    movw %es:(%esi), %cx
+    movzx %cx, %ecx
+    testw %cx, %cx
+    setz %al
+    jz _load_module_done
+    addl $511, %ecx
+    shrl $9, %ecx
+    movw %cx, read_sectors
+    call read_sector
+_load_module_done:
+    ret
+
+################################
 # read sector
 #
 .type read_sector, @function
