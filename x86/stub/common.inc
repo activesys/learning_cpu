@@ -1,56 +1,49 @@
 #
 # Common data and struct
 #
+# sector layout
+#
+# 0        1        5        9        64       80
+# +--------+--------+--------+---------+--------+--------+--------+
+# | boot   | setup  | lib16  |protected| lib32  |                 |
+# +--------+--------+--------+---------+--------+--------+--------+
+#     1         4       4      16       32
+#
+.equ BOOT_SECTOR,               0
+.equ SETUP_SECTOR,              1
+.equ LIB16_SECTOR,              5
+.equ PROTECTED_SECTOR,          9
+.equ LIB32_SECTOR,              80
+
+.equ BOOT_SECTOR_COUNT,         1
+.equ SETUP_SECTOR_COUNT,        4
+.equ LIB16_SECTOR_COUNT,        4
+.equ PROTECTED_SECTOR_COUNT,    16
+.equ LIB32_SECTOR_COUNT,        16
+
 # memory layout
 /*
 |                |
-+----------------+ 0x0b8000 video buffer (%es)
 |                |
++----------------+ 0xf000 lib32
 |                |
-+----------------+ 0xb000 user stack %esp
++----------------+ 0x9000 protected
 |                |
-+                + 0xa200 user stack
-|    user        |
-+                + 0xa100 user data
++----------------+ 0x8800 lib16
 |                |
-+----------------+ 0xa000 user code
-|                |
-+----------------+ 0x9000 kernel stack %esp
-|                |
-+                + 0x8200 kernel stack
-|    kernel      |
-+                + 0x8100 kernel data
-|                |
-+----------------+ 0x8000 kernel code
++----------------+ 0x8000 setup
 |                |
 +----------------+ 0x7c00 boot
 |                |
-+----------------+ 0x6000 setup
-|                |
-+----------------+ 0x4000 interrupt stack %esp
-|                |
-+                + 0x3200 interrupt stack
-| interrupt      |
-+                + 0x3100 interrupt data
-|                |
-+----------------+ 0x3000 interrupt
-|                |
-+----------------+ 0x2000 LDT
-|                |
-+----------------+ 0x1000 TSS
-|                |
-+----------------+ 0x800 GDT
-|                |
-+----------------+ 0x00 IDT
 */
 
 ################################################################
 # content address.
 .equ BOOT_SEG,      0x7c00
-.equ SETUP_SEG,     0x6000
-.equ INT_SEG,       0x3000
-.equ KERNEL_SEG,    0x8000
-.equ USER_SEG,      0xa000
+.equ SETUP_SEG,     0x8000
+.equ LIB16_SEG,     0x8a00
+.equ PROTECTED_SEG, 0x9000
+.equ LIB32_SEG,     0xf000
 
 ################################################################
 # GDT layout
