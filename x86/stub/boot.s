@@ -19,7 +19,7 @@ _start:
     jmp .
 
 
-################################
+###############################################################
 # load module
 #
 .type load_module, @function
@@ -43,7 +43,7 @@ load_module:
 _load_module_done:
     ret
 
-################################
+###############################################################
 # read sector
 #
 .type read_sector, @function
@@ -74,7 +74,7 @@ _read_sector_done:
     popw %es
     ret
 
-################################
+###############################################################
 # read sector with chs
 #
 .type read_sector_with_chs, @function
@@ -89,7 +89,7 @@ read_sector_with_chs:
     movzx %ah, %ax
     ret
 
-################################
+###############################################################
 # LBA to CHS
 # LBA = C * (header_maximun * sector_maximun) + H * sector_maximun + S - 1
 #
@@ -116,7 +116,7 @@ lba_to_chs:
     movb %al, %dh
     ret
 
-################################
+###############################################################
 # read sector with extension
 #
 .type read_sector_with_extension, @function
@@ -128,7 +128,7 @@ read_sector_with_extension:
     movzx %ah, %ax
     ret
 
-################################
+###############################################################
 # check int0x13 extension
 #
 .type check_int0x13_extension, @function
@@ -150,7 +150,7 @@ _check_int0x13_extension_done:
     movzx %al, %ax
     ret
 
-################################
+###############################################################
 # clear screen
 #
 .type clear_screen, @function
@@ -170,7 +170,7 @@ clear_screen:
     popa
     ret
 
-################################
+###############################################################
 # get driver parameter
 #
 .type get_driver_parameter, @function
@@ -202,7 +202,7 @@ _get_driver_parameter_done:
     popw %cx
     ret
 
-################################
+###############################################################
 # disk address packet
 #
 disk_address_packet:
@@ -211,7 +211,7 @@ disk_address_packet:
     buffer_offset:      .int    0
     buffer_selector:    .int    0
     start_sector:       .quad   0
-################################
+###############################################################
 # driver parameter table
 #
 driver_parameters_table:
@@ -222,6 +222,7 @@ driver_parameters_table:
     sector_maximun:     .int    0
     parameter_table:    .int    0
 
+###############################################################
 dummy:
     .space 510-(.-_start), 0
 magic_number:

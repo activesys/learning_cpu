@@ -3,29 +3,29 @@
 #
 # sector layout
 #
-# 0        1        5        9        64       80
+# 0        1        5        9         13      
 # +--------+--------+--------+---------+--------+--------+--------+
 # | boot   | setup  | lib16  |protected| lib32  |                 |
 # +--------+--------+--------+---------+--------+--------+--------+
-#     1         4       4      16       32
+#     1         4       4        4       32
 #
 .equ BOOT_SECTOR,               0
 .equ SETUP_SECTOR,              1
 .equ LIB16_SECTOR,              5
 .equ PROTECTED_SECTOR,          9
-.equ LIB32_SECTOR,              80
+.equ LIB32_SECTOR,              13
 
 .equ BOOT_SECTOR_COUNT,         1
 .equ SETUP_SECTOR_COUNT,        4
 .equ LIB16_SECTOR_COUNT,        4
-.equ PROTECTED_SECTOR_COUNT,    16
-.equ LIB32_SECTOR_COUNT,        16
+.equ PROTECTED_SECTOR_COUNT,    4
+.equ LIB32_SECTOR_COUNT,        32
 
 # memory layout
 /*
 |                |
 |                |
-+----------------+ 0xf000 lib32
++----------------+ 0xa000 lib32
 |                |
 +----------------+ 0x9000 protected
 |                |
@@ -43,7 +43,7 @@
 .equ SETUP_SEG,     0x8000
 .equ LIB16_SEG,     0x8a00
 .equ PROTECTED_SEG, 0x9000
-.equ LIB32_SEG,     0xf000
+.equ LIB32_SEG,     0xa000
 
 ################################################################
 # GDT layout
