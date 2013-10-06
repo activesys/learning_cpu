@@ -17,11 +17,11 @@ chmod -x boot.img
 rm -f boot boot.o boot.bin
 
 # build setup
-#as -o setup.o setup.s
-#ld -Ttext 0x6000 -o setup setup.o
-#objcopy -O binary setup setup.bin
-#dd if=setup.bin of=boot.img count=3 seek=1
-#rm -f setup setup.o setup.bin
+as -o setup.o setup.s
+ld -Ttext 0x8000 -o setup setup.o
+objcopy -O binary setup setup.bin
+dd if=setup.bin of=boot.img count=4 seek=1
+rm -f setup setup.o setup.bin
 
 # build int
 #as -o int.o int.s
