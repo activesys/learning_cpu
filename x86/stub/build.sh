@@ -5,7 +5,7 @@
 # +--------+--------+--------+---------+--------+--------+--------+
 # | boot   | setup  | lib16  |protected| lib32  |                 |
 # +--------+--------+--------+---------+--------+--------+--------+
-#     1         4       4        4       32
+#     1         4       4        4        4
 #
 
 # build boot
@@ -23,26 +23,26 @@ objcopy -O binary setup setup.bin
 dd if=setup.bin of=boot.img count=4 seek=1
 rm -f setup setup.o setup.bin
 
-# build int
-#as -o int.o int.s
-#ld -Ttext 0x3000 -o int int.o
-#objcopy -O binary int int.bin
-#dd if=int.bin of=boot.img count=1 seek=4
-#rm -f int int.o int.bin
+# build lib16
+as -o lib16.o lib16.s
+ld -Ttext 0x8800 -o lib16 lib16.o
+objcopy -O binary lib16 lib16.bin
+dd if=lib16.bin of=boot.img count=4 seek=5
+rm -f lib16 lib16.o lib16.bin
 
-# build kernel
-#as -o kernel.o kernel.s
-#ld -Ttext 0x8000 -o kernel kernel.o
-#objcopy -O binary kernel kernel.bin
-#dd if=kernel.bin of=boot.img count=1 seek=5
-#rm -f kernel kernel.o kernel.bin
+# build protected
+as -o protected.o protected.s
+ld -Ttext 0x9000 -o protected protected.o
+objcopy -O binary protected protected.bin
+dd if=protected.bin of=boot.img count=4 seek=9
+rm -f protected protected.o protected.bin
 
-# build user
-#as -o user.o user.s
-#ld -Ttext 0xa000 -o user user.o
-#objcopy -O binary user user.bin
-#dd if=user.bin of=boot.img count=1 seek=6
-#rm -f user user.o user.bin
+# build lib32
+as -o lib32.o lib32.s
+ld -Ttext 0xa000 -o lib32 lib32.o
+objcopy -O binary lib32 lib32.bin
+dd if=lib32.bin of=boot.img count=4 seek=13
+rm -f lib32 lib32.o lib32.bin
 
 exit 0
 

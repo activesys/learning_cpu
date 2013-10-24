@@ -17,6 +17,44 @@ _start:
     movw $TSS32_SELECTOR, %ax
     ltr %ax
 
+    # set interrupt handler
+    movl $GP_HANDLER_VECTOR, %esi
+    movl $GP_handler, %edi
+    call __set_interrupt_handler
+
+    movl $DB_HANDLER_VECTOR, %esi
+    movl $DB_handler, %edi
+    call __set_interrupt_handler
+
+    movl $AC_HANDLER_VECTOR, %esi
+    movl $AC_handler, %edi
+    call __set_interrupt_handler
+
+    movl $UD_HANDLER_VECTOR, %esi
+    movl $UD_handler, %edi
+    call __set_interrupt_handler
+
+    movl $NM_HANDLER_VECTOR, %esi
+    movl $NM_handler, %edi
+    call __set_interrupt_handler
+
+    movl $TS_HANDLER_VECTOR, %esi
+    movl $TS_handler, %edi
+    call __set_interrupt_handler
+
+    movl $OF_HANDLER_VECTOR, %esi
+    movl $OF_handler, %edi
+    call __set_user_interrupt_handler
+
+    movl $BP_HANDLER_VECTOR, %esi
+    movl $BP_handler, %edi
+    call __set_user_interrupt_handler
+
+    movl $BR_HANDLER_VECTOR, %esi
+    movl $BR_handler, %edi
+    call __set_user_interrupt_handler
+
+    jmp .
 
 ###############################################################
 # set interrupt handler for kernel and user
@@ -42,9 +80,20 @@ __set_user_interrupt_handler:
     ret
 
 ###############################################################
+# GDT, IDT
+__gdt_pointer:
+    __gdt_limit:    .short  0x00
+    __gdt_base:     .int    0x00
+
+__idt_pointer:
+    __idt_limit:    .short  0x00
+    __idt_base:     .int    0x00
+
+###############################################################
 # include exception handler
 .include "handler.s"
 
 ###############################################################
 dummy:
     .space 0x800-(.-_start), 0x00
+

@@ -7,7 +7,7 @@
 +--------+--------+--------+---------+--------+--------+--------+
 | boot   | setup  | lib16  |protected| lib32  |                 |
 +--------+--------+--------+---------+--------+--------+--------+
-    1         4       4        4       32
+    1         4       4        4        4
 */
 .equ BOOT_SECTOR,               0
 .equ SETUP_SECTOR,              1
@@ -19,7 +19,7 @@
 .equ SETUP_SECTOR_COUNT,        4
 .equ LIB16_SECTOR_COUNT,        4
 .equ PROTECTED_SECTOR_COUNT,    4
-.equ LIB32_SECTOR_COUNT,        32
+.equ LIB32_SECTOR_COUNT,        4
 
 # memory layout
 /*
@@ -183,25 +183,25 @@
 
 ################################################################
 # interrupt vector
-.equ DE_HANDLER_VECTOR          0
-.equ DB_HANDLER_VECTOR          1
-.equ NMI_HANDLER_VECTOR         2
-.equ BP_HANDLER_VECTOR          3
-.equ OF_HANDLER_VECTOR          4
-.equ BR_HANDLER_VECTOR          5
-.equ UD_HANDLER_VECTOR          6
-.equ NM_HANDLER_VECTOR          7
-.equ DF_HANDLER_VECTOR          8
-.equ TS_HANDLER_VECTOR          10
-.equ NP_HANDLER_VECTOR          11
-.equ SS_HANDLER_VECTOR          12
-.equ GP_HANDLER_VECTOR          13
-.equ PF_HANDLER_VECTOR          14
-.equ MF_HANDLER_VECTOR          16
-.equ AC_HANDLER_VECTOR          17
-.equ MC_HANDLER_VECTOR          18
-.equ XM_HANDLER_VECTOR          19
-.equ SX_HANDLER_VECTOR          31
+.equ DE_HANDLER_VECTOR,         0
+.equ DB_HANDLER_VECTOR,         1
+.equ NMI_HANDLER_VECTOR,        2
+.equ BP_HANDLER_VECTOR,         3
+.equ OF_HANDLER_VECTOR,         4
+.equ BR_HANDLER_VECTOR,         5
+.equ UD_HANDLER_VECTOR,         6
+.equ NM_HANDLER_VECTOR,         7
+.equ DF_HANDLER_VECTOR,         8
+.equ TS_HANDLER_VECTOR,         10
+.equ NP_HANDLER_VECTOR,         11
+.equ SS_HANDLER_VECTOR,         12
+.equ GP_HANDLER_VECTOR,         13
+.equ PF_HANDLER_VECTOR,         14
+.equ MF_HANDLER_VECTOR,         16
+.equ AC_HANDLER_VECTOR,         17
+.equ MC_HANDLER_VECTOR,         18
+.equ XM_HANDLER_VECTOR,         19
+.equ SX_HANDLER_VECTOR,         31
 
 ################################################################
 # read sector macro

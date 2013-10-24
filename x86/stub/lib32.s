@@ -1,5 +1,5 @@
 #
-# library
+# library 32
 #
 .include "common.inc"
 
@@ -9,6 +9,9 @@
 _start:
 
 # jump table
+puts:               jmp __puts
+print_int_value:    jmp __print_int_value
+println:            jmp __println 
 
 # function implements
 
@@ -93,7 +96,7 @@ __puts:
     pushl %ebx
     movl %esi, %ebx
     testl %ebx, %ebx
-    jz do_puts_done:
+    jz do_puts_done
 do_puts_loop:
     movb (%ebx), %al
     testb %al, %al
@@ -106,6 +109,64 @@ do_puts_done:
     popl %ebx
     ret
 
+###############################################################
+# __hex_to_char
+# input:  esi: hex number
+# output: eax: char
+__hex_to_char:
+    jmp do_hex_to_char
+char_str:   .ascii "0123456789ABCDEF"
+do_hex_to_char:
+    pushl %esi
+    andl $0x0f, %esi
+    movzx char_str(%esi), %eax
+    popl %esi
+    ret
+
+###############################################################
+# __print_byte_value
+# __print_short_value
+# __print_int_value
+__print_byte_value:
+    pushl %ebx
+    pushl %esi
+    movl %esi, %ebx
+    shrl $4, %esi
+    call __hex_to_char
+    movl %eax, %esi
+    call __putc
+    movl %ebx, %esi
+    call __hex_to_char
+    movl %eax, %esi
+    call __putc
+    popl %esi
+    popl %ebx
+    ret
+
+__print_short_value:
+    pushl %ebx
+    pushl %esi
+    movl %esi, %ebx
+    shrl $8, %esi
+    call __print_byte_value
+    movl %ebx, %esi
+    call __print_byte_value
+    popl %esi
+    popl %ebx
+    ret
+
+__print_int_value:
+    pushl %ebx
+    pushl %esi
+    movl %esi, %ebx
+    shrl $16, %esi
+    call __print_short_value
+    movl %ebx, %esi
+    call __print_short_value
+    popl %esi
+    popl %ebx
+    ret
+
 
 ###############################################################
 # video_current
@@ -114,3 +175,4 @@ video_current:  .int    0x0b8000
 ###############################################################
 dummy:
     .space 0x800-(.-_start), 0x00
+
