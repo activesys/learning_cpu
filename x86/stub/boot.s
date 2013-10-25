@@ -16,32 +16,28 @@ _start:
     call get_driver_parameter
     call clear_screen
 
-    jmp .
-
-
-###############################################################
-# load module
-#
-.type load_module, @function
-load_module:
-    movw $0x01, read_sectors
+    movl $SETUP_SEG, buffer_offset
+    movl $SETUP_SECTOR, start_sector
+    movl $SETUP_SECTOR_COUNT, read_sectors
     call read_sector
-    testw %ax, %ax
-    jnz _load_module_done
-    movw buffer_offset, %si
-    movzx %si, %esi
-    movw buffer_selector, %es
-    movw %es:(%esi), %cx
-    movzx %cx, %ecx
-    testw %cx, %cx
-    setz %al
-    jz _load_module_done
-    addl $511, %ecx
-    shrl $9, %ecx
-    movw %cx, read_sectors
+
+    movl $LIB16_SEG, buffer_offset
+    movl $LIB16_SECTOR, start_sector
+    movl $LIB16_SECTOR_COUNT, read_sectors
     call read_sector
-_load_module_done:
-    ret
+
+    movl $PROTECTED_SEG, buffer_offset
+    movl $PROTECTED_SECTOR, start_sector
+    movl $PROTECTED_SECTOR_COUNT, read_sectors
+    call read_sector
+
+    movl $LIB32_SEG, buffer_offset
+    movl $LIB32_SECTOR, start_sector
+    movl $LIB32_SECTOR_COUNT, read_sectors
+    call read_sector
+
+    ljmp $0x00, $SETUP_SEG
+
 
 ###############################################################
 # read sector
@@ -49,7 +45,6 @@ _load_module_done:
 .type read_sector, @function
 read_sector:
     pushw %es
-    pushl %eax
     movw buffer_selector, %es
 
     movl $start_sector, %eax
@@ -70,7 +65,6 @@ _chs_mode:
     call read_sector_with_chs
 
 _read_sector_done:
-    popl %eax
     popw %es
     ret
 
