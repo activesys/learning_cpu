@@ -54,6 +54,9 @@ _start:
     movl $BR_handler, %edi
     call __set_user_interrupt_handler
 
+    movw $0x00, %ax
+    movw %ax, %ss
+
     jmp .
 
 ###############################################################
