@@ -63,10 +63,43 @@ code_entry:
     movl $msg2, %esi
     call puts
 
+    call init_32bit_paging
+    movl $PDT32_BASE, %eax
+    movl %eax, %cr3
+
+    movl %cr0, %eax
+    bts %eax, $31
+    movl %eax, %cr0
+
+    movl $msg3, %esi
+    call puts
+    call println
+
+    movl $msg4, %esi
+    call puts
+    call dump_page
+
     jmp .
 
 msg1:   .asciz  "MAXPHYADDR: "
 msg2:   .asciz  "-bit"
+msg3:   .asciz  "now: enable paging with 32-bit paging."
+msg4:   .asciz  "----> dump virtual address 0x200000 ----"
+msg5:   .asciz  "----> dump virtual address 0x400000 ----"
+
+###############################################################
+# init_32bit_paging
+# 0x000000-0x3fffff maped to 0x00 page frame using 4M page
+# 0x400000-0x400fff maped to 0x400000 page frame using 4K page
+init_32bit_paging:
+    pushl %eax
+    movl $PDT32_BASE, %eax
+    movl $0x00000087, (%eax)    # set PDT[0]
+    movl $0x00201001, 4(%eax)   # set PDT[1]
+    movl $PTT32_BASE, %eax
+    movl $0x00400001, (%eax)
+    popl %eax
+    ret
 
 ###############################################################
 # set interrupt handler for kernel and user

@@ -83,3 +83,8 @@
 .equ XM_HANDLER_VECTOR,         19
 .equ SX_HANDLER_VECTOR,         31
 
+################################################################
+# paging
+.equ PDT32_BASE                 0x100000
+.equ PTT32_BASE                 0x201000
+
