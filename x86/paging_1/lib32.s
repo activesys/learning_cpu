@@ -14,6 +14,10 @@ print_int_value:    jmp __print_int_value
 println:            jmp __println 
 get_maxphyadd:      jmp __get_maxpyhadd
 print_int_decimal:  jmp __print_int_decimal
+print_qword_value:  jmp __print_qword_value
+printblank:         jmp __printblank
+reverse:            jmp __reverse
+dump_flags:         jmp __dump_flags
 
 # function implements
 
@@ -75,13 +79,6 @@ do_write_char_done:
 __putc:
     andl $0x00ff, %esi
     call __write_char
-    ret
-
-###############################################################
-# __printblank
-__printblank:
-    movw $0x20, %si
-    call __putc
     ret
 
 ###############################################################
@@ -230,6 +227,89 @@ do_print_decimal_done:
     popl %edi
     ret
 
+###############################################################
+# __print_qword_value()
+# input: %edi:%esi - 64-bit
+    pushl %ebx
+    pushl %esi
+    movl %esi, %ebx
+    movl %edi, %esi
+    call __print_int_value
+    movl %ebx, %esi
+    call __print_int_value
+    popl %esi
+    popl %ebx
+    ret
+
+###############################################################
+# __printblank
+__printblank:
+    movw $0x20, %si
+    call __putc
+    ret
+
+###############################################################
+# __reverse
+# input: %esi: value
+# output: %eax: reverse of value
+__reverse:
+    pushl %ecx
+    xorl %eax, %eax
+do_reverse:
+    bsrl %esi, %ecx
+    jz reverse_done
+    btrl %ecx, %esi
+    negl %ecx
+    addl $31, %ecx
+    btsl %ecx, %eax
+    jmp do_reverse
+reverse_done:
+    popl %ecx
+    ret
+
+###############################################################
+# __dump_flags
+# input: %esi: value, %edi: flags
+__dump_flags:
+    pushl %ebx
+    pushl %edx
+    pushl %ecx
+    movl %esi, %ecx
+    movl %edi, %ebx
+do_dump_flags_loop:
+    movl (%ebx), %edx
+    cmp $-1, %edx
+    je do_dump_flags_done
+    shrl $1, %ecx
+    setc %al
+    testl %edx, %edx
+    jz dump_flags_next
+    movl %edx, %esi
+    movl %edx, %edi
+    testb %al, %al
+    jz do_dump_flags_disable
+    call __lowers_to_uppers
+    jmp print_flags_msg
+do_dump_flags_disable
+    call __uppers_to_lowers
+print_flags_msg:
+    movl %edx, %esi
+    call __test_println
+    testl %eax, %eax
+    jz skip_ln
+    call println
+skip_ln:
+    movl %edx, %esi
+    call __puts
+    call __printblank
+dump_flags_next:
+    addl $4, %ebx
+    jmp do_dump_flags_loop
+do_dump_flags_done:
+    popl %ecx
+    popl %edx
+    popl %ebx
+    ret
 
 
 ###############################################################
