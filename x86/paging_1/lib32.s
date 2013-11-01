@@ -230,6 +230,7 @@ do_print_decimal_done:
 ###############################################################
 # __print_qword_value()
 # input: %edi:%esi - 64-bit
+__print_qword_value:
     pushl %ebx
     pushl %esi
     movl %esi, %ebx
@@ -268,6 +269,160 @@ reverse_done:
     ret
 
 ###############################################################
+# __lowercase:
+# input: %esi
+# output: %eax
+__lowercase:
+    andl $0xff, %esi
+    cmpl $'z', %esi
+    setbe %al
+    ja test_lowercase_done
+    cmpl $'a', %esi
+    setae %al
+test_lowercase_done:
+    movzx %al, %eax
+    ret
+
+###############################################################
+# __uppercase:
+# input: %esi
+# output: %eax
+__uppercase:
+    andl $0xff, %esi
+    cmpl $'Z', %esi
+    setbe %al
+    ja test_uppercase_done
+    cmpl $'A', %esi
+    setae %al
+test_uppercase_done:
+    movzx %al, %eax
+    ret
+
+###############################################################
+# __lower_to_upper:
+# input: %esi
+# output: %eax
+__lower_to_upper:
+    call __lowercase
+    testl %eax, %eax
+    jz do_lower_to_upper_done
+    movl $'a'-'A', %eax
+    negl %eax
+do_lower_to_upper_done:
+    addl %esi, %eax
+    ret
+
+###############################################################
+# __upper_to_lower:
+# input: %esi
+# output: %eax
+__upper_to_lower:
+    call __uppercase
+    testl %eax, %eax
+    jz do_upper_to_lower_done
+    movl $'a'-'A', %eax
+do_upper_to_lower_done:
+    addl %esi, %eax
+    ret
+
+###############################################################
+# __lowers_to_uppers:
+# input: %esi
+# output: %edi
+__lowers_to_uppers:
+    pushl %ebx
+    pushl %ecx
+    pushl %edx
+    movl %esi, %ecx
+    movl %edi, %edx
+    testl %ecx, %ecx
+    jz do_lowers_to_uppers_done
+    testl %edx, %edx
+    jz do_lowers_to_uppers_done
+
+do_lowers_to_uppers_loop:
+    movb (%ecx), %bl
+    movzx %bl, %esi
+    testl %esi, %esi
+    jz do_lowers_to_uppers_done
+    call __lower_to_upper
+    movb %al, (%edx)
+    incl %ecx
+    incl %edx
+    jmp do_lowers_to_uppers_loop
+
+do_lowers_to_uppers_done:
+    popl %edx
+    popl %ecx
+    popl %ebx
+    ret
+
+###############################################################
+# __uppers_to_lowers:
+# input: %esi
+# output: %edi
+__uppers_to_lowers:
+    pushl %ebx
+    pushl %ecx
+    pushl %edx
+    movl %esi, %ecx
+    movl %edi, %edx
+    testl %ecx, %ecx
+    jz do_uppers_to_lowers_done
+    testl %edx, %edx
+    jz do_uppers_to_lowers_done
+
+do_uppers_to_lowers_loop:
+    movb (%ecx), %bl
+    movzx %bl, %esi
+    testl %esi, %esi
+    jz do_lowers_to_uppers_done
+    call __upper_to_lower
+    movb %al, (%edx)
+    incl %ecx
+    incl %edx
+    jmp do_uppers_to_lowers_loop
+
+do_uppers_to_lowers_done:
+    popl %edx
+    popl %ecx
+    popl %ebx
+    ret
+
+###############################################################
+# __strlen
+# input: %esi
+# output: %eax
+__strlen:
+    movl $-1, %eax
+    testl %esi, %esi
+    jz strlen_done
+strlen_loop:
+    incl %eax
+    cmpb $0, (%esi, %eax)
+    jnz strlen_loop
+strlen_done:
+    ret
+
+###############################################################
+# __test_println
+# input: %esi
+# output: %eax
+__test_println:
+    pushl %ecx
+    call __strlen
+    movl %eax, %ecx
+    shll $1, %ecx
+    call __get_current_column
+    negl %eax
+    addl $160, %eax
+    cmpl %ecx, %eax
+    setb %al
+    movzx %al, %eax
+    popl %ecx
+    ret
+
+###############################################################
 # __dump_flags
 # input: %esi: value, %edi: flags
 __dump_flags:
@@ -290,7 +445,7 @@ do_dump_flags_loop:
     jz do_dump_flags_disable
     call __lowers_to_uppers
     jmp print_flags_msg
-do_dump_flags_disable
+do_dump_flags_disable:
     call __uppers_to_lowers
 print_flags_msg:
     movl %edx, %esi

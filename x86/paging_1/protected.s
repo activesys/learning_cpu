@@ -3,6 +3,7 @@
 #
 
 .include "common.inc"
+.include "lib32.inc"
 
 .code32
 .section .text
@@ -68,7 +69,7 @@ code_entry:
     movl %eax, %cr3
 
     movl %cr0, %eax
-    bts %eax, $31
+    bts $31, %eax
     movl %eax, %cr0
 
     movl $msg3, %esi
@@ -77,6 +78,12 @@ code_entry:
 
     movl $msg4, %esi
     call puts
+    movl $0x200000, %esi
+    call dump_page
+
+    movl $msg5, %esi
+    call puts
+    movl $0x400000, %esi
     call dump_page
 
     jmp .
