@@ -3,7 +3,6 @@
 #
 
 .include "common.inc"
-.include "lib32.inc"
 
 .code32
 .section .text
@@ -63,10 +62,13 @@ code_entry:
     call print_int_decimal
     movl $msg2, %esi
     call puts
+    call println
 
     call init_32bit_paging
     movl $PDT32_BASE, %eax
     movl %eax, %cr3
+
+    call pse_enable
 
     movl %cr0, %eax
     bts $31, %eax
@@ -108,6 +110,17 @@ init_32bit_paging:
     popl %eax
     ret
 
+pse_enable:
+    movl $1, %eax
+    cpuid
+    bt $3, %edx
+    jnc pse_enable_done
+    movl %cr4, %eax
+    bts $4, %eax
+    movl %eax, %cr4
+pse_enable_done:
+    ret
+
 ###############################################################
 # set interrupt handler for kernel and user
 # %esi : vector, %edi handler
@@ -143,6 +156,7 @@ __idt_pointer:
 
 ###############################################################
 # include exception handler
+.include "lib32.inc"
 .include "handler.s"
 .include "page32.s"
 
