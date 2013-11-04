@@ -64,6 +64,7 @@ code_entry:
     call puts
     call println
 
+    /*
     call init_32bit_paging
     movl $PDT32_BASE, %eax
     movl %eax, %cr3
@@ -73,10 +74,12 @@ code_entry:
     movl %cr0, %eax
     bts $31, %eax
     movl %eax, %cr0
+    */
 
     movl $msg3, %esi
     call puts
     call println
+    /*
 
     movl $msg4, %esi
     call puts
@@ -87,6 +90,7 @@ code_entry:
     call puts
     movl $0x400000, %esi
     call dump_page
+    */
 
     jmp .
 
