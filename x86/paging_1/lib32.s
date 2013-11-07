@@ -59,7 +59,7 @@ __write_char:
     call __get_current_column
     negl %eax
     addl $160, %eax
-    addl %eax, (%ebx)
+    addl (%ebx), %eax
     jmp do_write_char_done
 
 do_write_char:

@@ -64,7 +64,6 @@ code_entry:
     call puts
     call println
 
-    /*
     call init_32bit_paging
     movl $PDT32_BASE, %eax
     movl %eax, %cr3
@@ -74,31 +73,32 @@ code_entry:
     movl %cr0, %eax
     bts $31, %eax
     movl %eax, %cr0
-    */
 
     movl $msg3, %esi
     call puts
     call println
-    /*
 
     movl $msg4, %esi
     call puts
-    movl $0x200000, %esi
+    call println
+    movl $0x00200000, %esi
     call dump_page
+
+    call println
 
     movl $msg5, %esi
     call puts
-    movl $0x400000, %esi
+    call println
+    movl $0x00400000, %esi
     call dump_page
-    */
 
     jmp .
 
 msg1:   .asciz  "MAXPHYADDR: "
 msg2:   .asciz  "-bit"
 msg3:   .asciz  "now: enable paging with 32-bit paging."
-msg4:   .asciz  "----> dump virtual address 0x200000 ----"
-msg5:   .asciz  "----> dump virtual address 0x400000 ----"
+msg4:   .asciz  "----> dump virtual address 0x200000 <----"
+msg5:   .asciz  "----> dump virtual address 0x400000 <----"
 
 ###############################################################
 # init_32bit_paging

@@ -38,7 +38,7 @@ dump_4m_page:
 
 dump_4k_page:
 # PDE
-    movl %esi, %edx
+    movl %edx, %esi
     andl $0xfffff000, %esi
     movl %esi, pt_base
     movl $0x00, %edi
@@ -57,6 +57,7 @@ dump_4k_page:
     movl $pte_msg, %esi
     call puts
     movl %ecx, %esi
+    call __get_32bit_paging_pte_index
     leal (, %eax, 4), %eax
     addl pt_base, %eax
     movl (%eax), %ecx
@@ -117,7 +118,7 @@ ps_flags:       .asciz  "ps"
 g_flags:        .asciz  "g"
 pat_flags:      .asciz  "pat"
 ignore_flags:   .asciz  "-"
-blank_flags:    .asciz  "    "
+blank_flags:    .asciz  "   "
 reserved_flags: .asciz  "0"
 xd_flags:       .asciz  "xd"
 
