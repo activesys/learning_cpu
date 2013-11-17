@@ -55,6 +55,11 @@ _start:
     call __set_user_interrupt_handler
 
 code_entry:
+    # enable sse
+    movl %cr4, %eax
+    btsl $9, %eax
+    movl %eax, %cr4
+
     call pae_enable
     call xd_enable
     call init_pae32_paging
@@ -255,5 +260,5 @@ xd_bit:             .int    0x00
 
 ###############################################################
 dummy:
-    .space 0x800-(.-_start), 0x00
+    .space 0x1000-(.-_start), 0x00
 

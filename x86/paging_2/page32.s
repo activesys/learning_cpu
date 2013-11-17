@@ -25,7 +25,7 @@ dump_pae_page:
     movl %edi, %ebx
     btl $0, %edx
     jc pdpte_next
-    movl $not_available
+    movl $not_available, %esi
     call puts
     call println
     jmp dump_pae_page_done
@@ -43,7 +43,7 @@ pdpte_next:
     shll $19, %esi
     call reverse
     movl %eax, %esi
-    call $pdpte_pae_flags, %edi
+    movl $pdpte_pae_flags, %edi
     call dump_flags
     call println
     movl maxphyaddr_select_mask+4, %eax
@@ -56,7 +56,102 @@ print_reserved_error:
     movl $reserved_error, %edi
     cmovnz %edi, %esi
     call puts
-
+    # output PDE
+    movl $pde_msg, %esi
+    call puts
+    movl %ecx, %eax
+    andl $0x3fe00000, %eax
+    shrl $21, %eax
+    movl pdt_base, %ebx
+    movl 4(%ebx, %eax, 8), %edi
+    movl (%ebx, %eax, 8), %esi
+    movl %esi, %edx
+    movl %edi, %ebx
+    btl $0, %edx
+    jc pde_next
+    movl $not_available, %esi
+    call puts
+    call println
+    jmp dump_pae_page_done
+pde_next:
+    btl $7, %edx
+    jnc dump_pae_4k_pde
+    andl maxphyaddr_select_mask, %esi
+    andl $0xffe00000, %esi
+    andl maxphyaddr_select_mask+4, %edi
+    call print_qword_value
+    call printblank
+    movl $attr_msg, %esi
+    call puts
+    movl %edx, %esi
+    shll $18, %esi
+    btrl $31, %esi
+    andl $0x80000000, %ebx
+    orl %ebx, %esi
+    call reverse
+    movl %eax, %esi
+    movl $pde_pae_2m_flags, %edi
+    call dump_flags
+    call println
+    testl $0x000fe000, %edx
+    movl $0x00, %esi
+    movl $reserved_error, %edi
+    cmovnz %edi, %esi
+    call puts
+    jmp dump_pae_page_done
+dump_pae_4k_pde:
+    andl $0xfffff000, %esi
+    andl $0x7fffffff, %edi
+    movl %esi, pt_base
+    movl %edi, pt_base+4
+    call print_qword_value
+    call printblank
+    movl $attr_msg, %esi
+    call puts
+    movl %edx, %esi
+    shll $18, %esi
+    btrl $31, %esi
+    andl $0x80000000, %ebx
+    orl %ebx, %esi
+    call reverse
+    movl %eax, %esi
+    movl $pde_pae_4k_flags, %edi
+    call dump_flags
+    call println
+    # output PTE
+    movl $pte_msg, %esi
+    call puts
+    movl %ecx, %eax
+    andl $0x001ff000, %eax
+    shrl $12, %eax
+    movl pt_base, %ebx
+    movl 4(%ebx, %eax, 8), %edi
+    movl (%ebx, %eax, 8), %esi
+    movl %esi, %edx
+    movl %edi, %ebx
+    btl $0, %edx
+    jc pte_next
+    movl $not_available, %esi
+    call puts
+    call println
+    jmp dump_pae_page_done
+pte_next:
+    andl $0xfffff000, %esi
+    andl $0x7fffffff, %edi
+    call print_qword_value
+    call printblank
+    movl $attr_msg, %esi
+    call puts
+    movl %edx, %esi
+    shll $18, %esi
+    btrl $31, %esi
+    andl $0x80000000, %ebx
+    orl %ebx, %esi
+    call reverse
+    movl %eax, %esi
+    movl $pte_pae_4k_flags, %edi
+    call dump_flags
+    call println
 dump_pae_page_done:
     popl %ebx
     popl %edx
@@ -82,7 +177,6 @@ get_maxphyaddr_select_mask:
     movl $maxphyaddr_select_mask, %ecx
     movl %eax, (%ecx)
     movl %edx, 4(%ecx)
-    movl 
     popl %edx
     popl %ecx
     ret
@@ -218,10 +312,13 @@ xd_flags:       .asciz  "xd"
 pdpte_pae_flags:.int blank_flags, ignore_flags, ignore_flags, ignore_flags, reserved_flags, reserved_flags
                 .int reserved_flags, reserved_flags, pcd_flags, pwt_flags, reserved_flags, reserved_flags
                 .int p_flags, -1
+pde_pae_2m_flags:.int xd_flags
 pde_4m_flags:   .int pat_flags, ignore_flags, ignore_flags, ignore_flags, g_flags, ps_flags
                 .int d_flags, a_flags, pcd_flags, pwt_flags, us_flags, rw_flags, p_flags, -1
+pde_pae_4k_flags:.int xd_flags
 pde_4k_flags:   .int blank_flags, ignore_flags, ignore_flags, ignore_flags, ignore_flags, ps_flags
                 .int ignore_flags, a_flags, pcd_flags, pwt_flags, us_flags, rw_flags, p_flags, -1
+pte_pae_4k_flags:.int xd_flags
 pte_4k_flags:   .int blank_flags, ignore_flags, ignore_flags, ignore_flags, g_flags, pat_flags
                 .int d_flags, a_flags, pcd_flags, pwt_flags, us_flags, rw_flags, p_flags, -1
 
