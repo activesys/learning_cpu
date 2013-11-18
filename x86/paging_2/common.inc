@@ -7,18 +7,18 @@
 +--------+--------+--------+---------+--------+--------+--------+
 | boot   | setup  | lib16  |protected| lib32  |                 |
 +--------+--------+--------+---------+--------+--------+--------+
-    1         4       4        4        4
+    1         4       4        8        4
 */
 .equ BOOT_SECTOR,               0
 .equ SETUP_SECTOR,              1
 .equ LIB16_SECTOR,              5
 .equ PROTECTED_SECTOR,          9
-.equ LIB32_SECTOR,              13
+.equ LIB32_SECTOR,              17
 
 .equ BOOT_SECTOR_COUNT,         1
 .equ SETUP_SECTOR_COUNT,        4
 .equ LIB16_SECTOR_COUNT,        4
-.equ PROTECTED_SECTOR_COUNT,    4
+.equ PROTECTED_SECTOR_COUNT,    8
 .equ LIB32_SECTOR_COUNT,        4
 
 # memory layout

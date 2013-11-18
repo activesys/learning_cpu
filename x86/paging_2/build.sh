@@ -1,11 +1,11 @@
 #!/bin/sh
 
 #
-# 0        1        5        9         13      
+# 0        1        5        9         17      
 # +--------+--------+--------+---------+--------+--------+--------+
 # | boot   | setup  | lib16  |protected| lib32  |                 |
 # +--------+--------+--------+---------+--------+--------+--------+
-#     1         4       4        4        4
+#     1         4       4        8        4
 #
 
 # build boot
@@ -34,14 +34,14 @@ rm -f lib16 lib16.o lib16.bin
 as -o protected.o protected.s
 ld -Ttext 0x9000 -o protected protected.o
 objcopy -O binary protected protected.bin
-dd if=protected.bin of=boot.img count=4 seek=9
+dd if=protected.bin of=boot.img count=8 seek=9
 rm -f protected protected.o protected.bin
 
 # build lib32
 as -o lib32.o lib32.s
 ld -Ttext 0xa000 -o lib32 lib32.o
 objcopy -O binary lib32 lib32.bin
-dd if=lib32.bin of=boot.img count=4 seek=13
+dd if=lib32.bin of=boot.img count=4 seek=17
 rm -f lib32 lib32.o lib32.bin
 
 exit 0

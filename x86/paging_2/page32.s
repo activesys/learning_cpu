@@ -174,6 +174,7 @@ get_maxphyaddr_select_mask:
     cmovel %eax, %edx
     shll %cl, %edx
     shrl %cl, %edx
+    movl $-1, %eax
     movl $maxphyaddr_select_mask, %ecx
     movl %eax, (%ecx)
     movl %edx, 4(%ecx)

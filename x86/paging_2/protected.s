@@ -74,30 +74,35 @@ code_entry:
     movl $msg1, %esi
     call puts
     call println
+    call println
 
     movl $msg2, %esi
     call puts
     call println
     movl $0x200000, %esi
     call dump_pae_page
+    call println
 
     movl $msg3, %esi
     call puts
     call println
     movl $0x400000, %esi
     call dump_pae_page
+    call println
 
     movl $msg4, %esi
     call puts
     call println
     movl $0x401000, %esi
     call dump_pae_page
+    call println
 
     movl $msg5, %esi
     call puts
     call println
     movl $0x600000, %esi
     call dump_pae_page
+    call println
 
     movl $msg6, %esi
     call puts
@@ -139,7 +144,7 @@ init_pae32_paging:
     movl $0x00200087, (%esi, %eax, 8)
     movl $0x00, 4(%esi, %eax, 8)
     inc %eax
-    movl $0x00200007, (%esi, %eax, 8)
+    movl $0x00202007, (%esi, %eax, 8)
     movl $0x00, 4(%esi, %eax, 8)
     # PTE[0] 0x400000 ~ 0x400fff (4K)
     movl $0x202000, %esi
