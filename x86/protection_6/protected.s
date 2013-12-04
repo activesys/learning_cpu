@@ -179,8 +179,8 @@ init_pae32_paging:
     movl $0x00200087, (%esi, %eax, 8)
     movl $0x00, 4(%esi, %eax, 8)
     inc %eax
-    movl $0x00202006, (%esi, %eax, 8)
-    movl $0x00, 4(%esi, %eax, 8)
+    movl $0x00202007, (%esi, %eax, 8)
+    movl $0x70000000, 4(%esi, %eax, 8)
     # PTE[0] 0x400000 ~ 0x400fff (4K)
     movl $0x202000, %esi
     movl $0x00400000, (%esi)

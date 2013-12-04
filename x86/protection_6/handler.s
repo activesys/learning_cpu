@@ -23,55 +23,123 @@ do_GP_handler_done:
 PF_handler:
     jmp do_PF_handler
 pf_msg1:  .asciz  "----> Now, enter #PF handler, occur at: 0x"
-pf_msg2:  .asciz  "----> fixup <----"
+pf_msg2:  .asciz  "----> Error Code: 0x"
+pf_msg3:  .asciz  "----> fixup <----"
 do_PF_handler:
-    addl $0x04, %esp
+    popl %esi
     pushl %ecx
     pushl %edx
     pushl %ebx
+
+    movl %esi, %ebx
+    # puts error address
     movl $pf_msg1, %esi
     call puts
-
     movl %cr2, %ecx
     movl %ecx, %esi
     call print_int_value
     call println
+    # puts error code
+    movl $pf_msg2, %esi
+    call puts
+    movl %ebx, %esi
+    call print_int_value
+    call println
+
+    call get_maxphyadd
+    pushl %ecx
+    leal -64(%eax), %ecx
+    negl %ecx
+    movl $-1, %edi
+    shll %cl, %edi
+    shrl %cl, %edi
+    popl %ecx
 
 # fix error
+get_pdpte:
     movl %ecx, %eax
     shrl $30, %eax
     andl $0x03, %eax
     movl $PDPT_BASE, %ebx
+
     # PDPTE
+    pushl %edi
+    movl 4(%ebx, %eax, 8), %edx
+    notl %edi
+    andl %edx, %edi
+    jz get_pdpte_low
+    popl %edi
+    andl %edi, %edx
+    movl %edx, 4(%ebx, %eax, 8)
+    jmp do_PF_handler_done
+
+get_pdpte_low:
+    popl %edi
     movl (%ebx, %eax, 8), %edx
     btsl $0, %edx
+    movl %edx, (%ebx, %eax, 8)
     jnc do_PF_handler_done
 
+get_pde:
     #PDE
     movl %edx, %ebx
     andl $0xfffff000, %ebx
     movl %ecx, %eax
     shrl $21, %eax
     andl $0x01ff, %eax
+
+    pushl %edi
+    movl 4(%ebx, %eax, 8), %edx
+    notl %edi
+    andl $0x7fffffff, %edi
+    andl %edx, %edi
+    jz get_pde_low
+    popl %edi
+    orl $0x80000000, %edi
+    andl %edi, %edx
+    movl %edx, 4(%ebx, %eax, 8)
+    jmp do_PF_handler_done
+
+get_pde_low:
+    popl %edi
     movl (%ebx, %eax, 8), %edx
     btsl $0, %edx
+    movl %edx, (%ebx, %eax, 8)
     jnc do_PF_handler_done
     bt $7, %edx
+    movl %edx, (%ebx, %eax, 8)
     jc do_PF_handler_done
 
+get_pte:
     #PTE
     movl %edx, %ebx
     andl $0xfffff000, %ebx
     movl %ecx, %eax
     shrl $12, %eax
     andl $0x01ff, %eax
+
+    pushl %edi
+    movl 4(%ebx, %eax, 8), %edx
+    notl %edi
+    andl $0x7fffffff, %edi
+    andl %edx, %edi
+    jz get_pte_low
+    popl %edi
+    orl $0x80000000, %edi
+    andl %edi, %edx
+    movl %edx, 4(%ebx, %eax, 8)
+    jmp do_PF_handler_done
+
+get_pte_low:
+    popl %edi
     movl (%ebx, %eax, 8), %edx
     btsl $0, %edx
+    movl %edx, (%ebx, %eax, 8)
+    jc do_PF_handler_done
 
 do_PF_handler_done:
-    movl %edx, (%ebx, %eax, 8)
 
-    movl $pf_msg2, %esi
+    movl $pf_msg3, %esi
     call puts
     call println
     call println
