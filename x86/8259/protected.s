@@ -76,11 +76,9 @@ code_entry:
     movl $timer_handler, %edi
     call __set_interrupt_handler
 
-/*
     movl $KEYBOARD_VECTOR, %esi
     movl $keyboard_handler, %edi
     call __set_interrupt_handler
-    */
 
     call init_8259a
 
@@ -91,13 +89,13 @@ code_entry:
 
     movl $0xffffff, %ecx
 l1:
-    #in $0x92, %al
     nop
     loop l1
 
     call dump_8259_imr
     call dump_8259_irr
     call dump_8259_isr
+    call println
 
     call enable_timer
 

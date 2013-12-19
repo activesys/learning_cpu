@@ -3,11 +3,31 @@
 #
 
 ###############################################################
+# keyboard_handler
+keyboard_handler:
+    jmp do_keyboard_handler
+kmsg:   .asciz  ">>> now: enter keyboard handler"
+kmsg1:  .asciz  "exit the keyboard handler<<<"
+do_keyboard_handler:
+    movl $kmsg, %esi
+    call puts
+    call println
+    call dump_8259_imr
+    call dump_8259_irr
+    call dump_8259_isr
+    movl $kmsg1, %esi
+    call puts
+    call println
+    call println
+    call write_master_EOI
+    iret
+
+###############################################################
 # timer_handler
 timer_handler:
     jmp do_timer_handler
-tmsg:   .asciz  ">>> now: enter 8253-timer handler"
-tmsg1:  .asciz  "exit the 8253-timer handler<<<"
+tmsg:   .asciz  ">>> now: enter timer handler"
+tmsg1:  .asciz  "exit the timer handler<<<"
 do_timer_handler:
     movl $tmsg, %esi
     call puts
@@ -18,9 +38,11 @@ do_timer_handler:
     movl $tmsg1, %esi
     call puts
     call println
+    call println
     call write_master_EOI
     call disable_timer
-    ret
+    call enable_keyboard
+    iret
 
 ###############################################################
 # GP_handler():
